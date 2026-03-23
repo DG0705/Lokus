@@ -152,7 +152,7 @@ export default function AdminDashboard() {
               <p className="text-xs text-stone-500 mt-1">Set to 0 for instant LIVE drop.</p>
             </div>
             <div className="bg-stone-900/50 border border-stone-700 p-4 rounded-xl flex flex-col justify-center">
-              <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-2">Drop Duration (Hours)</label>
+              <p className="text-xs text-stone-500 mt-1">Time before asset shifts to SOLD OUT. (Set to 0 for Always-On / General Release).</p>
               <input required type="number" min="1" value={newProduct.duration_hours} onChange={e => setNewProduct({...newProduct, duration_hours: e.target.value})} className="bg-transparent border-none p-0 focus:outline-none text-white font-black text-xl w-full" />
               <p className="text-xs text-stone-500 mt-1">Time before asset shifts to SOLD OUT.</p>
             </div>

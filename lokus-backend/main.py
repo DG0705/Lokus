@@ -1,5 +1,5 @@
 import asyncio
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
@@ -19,6 +19,41 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ==========================================
+# REAL-TIME WEBSOCKET MANAGER
+# ==========================================
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except:
+                pass # Ignore dropped connections
+
+manager = ConnectionManager()
+
+@app.websocket("/api/v1/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """The live tunnel for the frontend to connect to."""
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Keep the connection alive
+            await websocket.receive_text() 
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 # ==========================================
 # BACKGROUND WORKER (Cart & Temporal Engine)
@@ -112,24 +147,24 @@ def get_upcoming_drops(db: Session = Depends(get_db)):
 # TRANSACTION ORCHESTRATOR & CHECKOUT
 # ==========================================
 @app.post("/api/v1/reserve")
-def reserve_shoe(user_id: int, shoe_id: int, db: Session = Depends(get_db)):
+def reserve_shoe(user_id: int, shoe_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     try:
         shoe = db.query(models.Product).filter(models.Product.id == shoe_id).with_for_update().first()
         if not shoe: raise HTTPException(status_code=404, detail="Shoe not found.")
         if shoe.status != models.ProductState.LIVE: raise HTTPException(status_code=400, detail="Shoe is not currently live.")
         if shoe.available_stock <= 0: raise HTTPException(status_code=409, detail="Constraint Failed: Out of Stock")
 
-        # Dynamic Constraint: Anti-Hoarding for Hyped Drops
+        # Dynamic Constraint
         if shoe.is_hyped_drop:
             existing_res = db.query(models.Reservation).filter(
                 models.Reservation.user_id == user_id, models.Reservation.shoe_id == shoe_id,
                 models.Reservation.status == models.ReservationState.RESERVED
             ).first()
             existing_order = db.query(models.Order).filter(models.Order.user_id == user_id, models.Order.shoe_id == shoe_id).first()
-            
             if existing_res or existing_order:
                 raise HTTPException(status_code=403, detail="Constraint Active: Strictly 1 pair per customer for Hyped Drops.")
 
+        # State Transition
         shoe.available_stock -= 1
         if shoe.available_stock == 0: shoe.status = models.ProductState.SOLD_OUT
             
@@ -140,6 +175,16 @@ def reserve_shoe(user_id: int, shoe_id: int, db: Session = Depends(get_db)):
         db.add(new_reservation)
         db.commit()
         db.refresh(new_reservation)
+        
+        # ==========================================
+        # NEW: BROADCAST THE LIVE STOCK UPDATE
+        # ==========================================
+        background_tasks.add_task(manager.broadcast, {
+            "type": "STOCK_UPDATE",
+            "shoe_id": shoe.id,
+            "available_stock": shoe.available_stock,
+            "status": shoe.status.value
+        })
         
         return {"message": "Secured!", "reservation_id": new_reservation.id, "expires_at": new_reservation.expires_at}
     except HTTPException as he:
@@ -259,7 +304,7 @@ def add_new_product(product: ProductCreate, db: Session = Depends(get_db)):
     try:
         now = datetime.now(timezone.utc)
         start_time = now + timedelta(minutes=product.delay_minutes)
-        end_time = start_time + timedelta(hours=product.duration_hours)
+        end_time = start_time + timedelta(hours=product.duration_hours) if product.duration_hours > 0 else None
         initial_status = models.ProductState.UPCOMING if product.delay_minutes > 0 else models.ProductState.LIVE
 
         new_product = models.Product(
