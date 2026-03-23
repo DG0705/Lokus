@@ -3,35 +3,50 @@
 import { useState, useEffect } from 'react';
 
 export default function AdminDashboard() {
+  // Global State
   const [stats, setStats] = useState({ total_shoes_tracked: 0, active_locks: 0, expired_violators: 0, sold_out_count: 0 });
   const [orders, setOrders] = useState<any[]>([]);
+  const [pendingProducts, setPendingProducts] = useState<any[]>([]);
+  
+  // Sweeper State
   const [isSweeping, setIsSweeping] = useState(false);
   const [sweepLog, setSweepLog] = useState<string | null>(null);
 
+  // Injection State
   const [newProduct, setNewProduct] = useState({
     brand: '', model_name: '', colorway: '', price_inr: '', image_url: '', total_stock: '', delay_minutes: '0', duration_hours: '24'
   });
   const [isAdding, setIsAdding] = useState(false);
   const [addMessage, setAddMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
+  // Real-Time Polling Engine
   useEffect(() => {
-    const fetchStatsAndOrders = async () => {
+    const fetchDashboardData = async () => {
       try {
+        // 1. Fetch Stats
         const statsRes = await fetch('http://127.0.0.1:8000/api/v1/admin/stats');
         setStats(await statsRes.json());
         
+        // 2. Fetch Orders Pipeline
         const ordersRes = await fetch('http://127.0.0.1:8000/api/v1/admin/orders');
         const ordersData = await ordersRes.json();
         setOrders(ordersData.orders || []);
+
+        // 3. Fetch Escrow Pending Products
+        const pendingRes = await fetch('http://127.0.0.1:8000/api/v1/admin/pending-products');
+        const pendingData = await pendingRes.json();
+        setPendingProducts(pendingData.pending_products || []);
       } catch (err) {
         console.error("Engine disconnected.");
       }
     };
-    fetchStatsAndOrders();
-    const interval = setInterval(fetchStatsAndOrders, 2000);
+    
+    fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 2000); // Sync every 2 seconds
     return () => clearInterval(interval);
   }, []);
 
+  // --- HANDLERS ---
   const handleForceSweep = async () => {
     setIsSweeping(true);
     setSweepLog(null);
@@ -75,6 +90,28 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleApproveProduct = async (productId: number) => {
+    const delay = prompt("Launch Delay in minutes? (0 for instant live)", "0");
+    if (delay === null) return; 
+    const duration = prompt("Drop Duration in hours? (0 for infinite/Always-On)", "24");
+    if (duration === null) return; 
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/products/${productId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ delay_minutes: parseInt(delay), duration_hours: parseInt(duration) })
+      });
+      if (res.ok) {
+        alert("Asset Approved & Scheduled successfully!");
+      } else {
+        alert("Failed to approve product.");
+      }
+    } catch (err) {
+      alert("Error connecting to Engine.");
+    }
+  };
+
   const handleStateTransition = async (orderId: number, newState: string) => {
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/orders/${orderId}/transition`, {
@@ -101,7 +138,7 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* METRICS */}
+        {/* 1. METRICS */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <div className="bg-stone-800 p-6 rounded-2xl border border-stone-700">
             <h3 className="text-xs font-bold uppercase tracking-widest text-stone-400 mb-4">Total Products</h3>
@@ -121,7 +158,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* SWEEPER */}
+        {/* 2. SWEEPER */}
         <section className="bg-stone-800 border border-stone-700 rounded-3xl p-8 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
@@ -135,9 +172,47 @@ export default function AdminDashboard() {
           {sweepLog && <div className="mt-6 p-4 bg-stone-900 border border-stone-700 rounded-lg font-mono text-sm text-green-400">{">"} {sweepLog}</div>}
         </section>
 
-        {/* INJECTION */}
+        {/* 3. ESCROW REVIEW QUEUE */}
         <section className="bg-stone-800 border border-stone-700 rounded-3xl p-8 mb-8">
-          <div className="mb-8"><h3 className="text-2xl font-black uppercase tracking-tight mb-2">Inventory Injection & Scheduling</h3></div>
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <h3 className="text-2xl font-black uppercase tracking-tight mb-2 text-blue-400">Escrow Review Queue</h3>
+              <p className="text-stone-400 text-sm font-medium">Assets uploaded by Suppliers awaiting Auth & Scheduling.</p>
+            </div>
+            <div className="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
+              <span className="text-sm font-bold text-stone-400">Pending: <span className="text-white">{pendingProducts.length}</span></span>
+            </div>
+          </div>
+
+          {pendingProducts.length === 0 ? (
+            <div className="text-center p-8 bg-stone-900/50 rounded-2xl border border-stone-700/50 border-dashed"><p className="text-stone-500 font-bold uppercase tracking-widest text-sm">Queue Empty</p></div>
+          ) : (
+            <div className="space-y-4">
+              {pendingProducts.map((product) => (
+                <div key={product.id} className="bg-stone-900 p-5 rounded-2xl border border-stone-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 w-full md:w-auto">
+                    <img src={product.image_url} alt="shoe" className="w-16 h-16 object-cover rounded-lg bg-stone-800" />
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-widest text-blue-500 mb-1">Vendor ID: {product.supplier_id}</p>
+                      <h4 className="text-lg font-bold text-white">{product.brand} {product.model_name}</h4>
+                      <p className="text-sm text-stone-400">₹{product.price_inr.toLocaleString()} • Stock: {product.total_stock}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => handleApproveProduct(product.id)}
+                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest px-6 py-3 rounded-xl transition-all shadow-lg whitespace-nowrap"
+                  >
+                    Review & Approve
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* 4. DIRECT INJECTION */}
+        <section className="bg-stone-800 border border-stone-700 rounded-3xl p-8 mb-8 opacity-75 hover:opacity-100 transition-opacity">
+          <div className="mb-8"><h3 className="text-xl font-black uppercase tracking-tight mb-2">Manual Admin Injection</h3></div>
           <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <input required type="text" placeholder="Brand" value={newProduct.brand} onChange={e => setNewProduct({...newProduct, brand: e.target.value})} className="bg-stone-900 border border-stone-700 p-4 rounded-xl focus:outline-none focus:border-stone-500 text-white font-bold" />
             <input required type="text" placeholder="Model Name" value={newProduct.model_name} onChange={e => setNewProduct({...newProduct, model_name: e.target.value})} className="bg-stone-900 border border-stone-700 p-4 rounded-xl focus:outline-none focus:border-stone-500 text-white font-bold" />
@@ -149,24 +224,22 @@ export default function AdminDashboard() {
             <div className="bg-stone-900/50 border border-stone-700 p-4 rounded-xl flex flex-col justify-center">
               <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-2">Launch Delay (Minutes)</label>
               <input required type="number" min="0" value={newProduct.delay_minutes} onChange={e => setNewProduct({...newProduct, delay_minutes: e.target.value})} className="bg-transparent border-none p-0 focus:outline-none text-white font-black text-xl w-full" />
-              <p className="text-xs text-stone-500 mt-1">Set to 0 for instant LIVE drop.</p>
             </div>
             <div className="bg-stone-900/50 border border-stone-700 p-4 rounded-xl flex flex-col justify-center">
-              <p className="text-xs text-stone-500 mt-1">Time before asset shifts to SOLD OUT. (Set to 0 for Always-On / General Release).</p>
-              <input required type="number" min="1" value={newProduct.duration_hours} onChange={e => setNewProduct({...newProduct, duration_hours: e.target.value})} className="bg-transparent border-none p-0 focus:outline-none text-white font-black text-xl w-full" />
-              <p className="text-xs text-stone-500 mt-1">Time before asset shifts to SOLD OUT.</p>
+              <label className="text-[10px] font-black uppercase tracking-widest text-stone-500 mb-2">Drop Duration (Hours)</label>
+              <input required type="number" min="0" value={newProduct.duration_hours} onChange={e => setNewProduct({...newProduct, duration_hours: e.target.value})} className="bg-transparent border-none p-0 focus:outline-none text-white font-black text-xl w-full" />
             </div>
             
             <div className="md:col-span-2 mt-4">
               <button disabled={isAdding} type="submit" className="w-full bg-stone-100 text-stone-900 font-black uppercase tracking-widest py-5 rounded-xl hover:bg-white transition-all disabled:opacity-50">
-                {isAdding ? 'Scheduling Asset...' : 'Deploy to State Machine'}
+                {isAdding ? 'Scheduling...' : 'Inject Bypass'}
               </button>
             </div>
             {addMessage && <div className={`md:col-span-2 p-4 rounded-lg font-bold text-center uppercase tracking-widest text-sm ${addMessage.type === 'success' ? 'bg-green-900/30 text-green-400 border border-green-800' : 'bg-red-900/30 text-red-400 border border-red-800'}`}>{addMessage.text}</div>}
           </form>
         </section>
 
-        {/* FULFILLMENT PIPELINE */}
+        {/* 5. FULFILLMENT PIPELINE */}
         <section className="bg-stone-800 border border-stone-700 rounded-3xl p-8">
           <div className="mb-8 flex justify-between items-center">
             <div>

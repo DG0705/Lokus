@@ -4,7 +4,9 @@ from database import Base
 import enum
 from datetime import datetime, timezone
 
+# --- ENUMS ---
 class ProductState(str, enum.Enum):
+    PENDING_APPROVAL = "PENDING_APPROVAL" # For supplier uploads
     UPCOMING = "UPCOMING"
     LIVE = "LIVE"
     SOLD_OUT = "SOLD_OUT"
@@ -21,9 +23,34 @@ class OrderState(str, enum.Enum):
     DELIVERED = "DELIVERED"
     CANCELLED = "CANCELLED"
 
+# --- TABLES ---
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    role = Column(String, default="customer") 
+    address = Column(String)
+    pincode = Column(String)                  
+    hashed_password = Column(String)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class PendingUser(Base):
+    __tablename__ = "pending_users"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    email = Column(String, unique=True, index=True)
+    role = Column(String, default="customer") 
+    address = Column(String)
+    pincode = Column(String)                  
+    hashed_password = Column(String)
+    verification_code = Column(String, index=True)
+    expires_at = Column(DateTime)
+
 class Product(Base):
     __tablename__ = "products"
     id = Column(Integer, primary_key=True, index=True)
+    supplier_id = Column(Integer, index=True, nullable=True) # Links to vendor
     brand = Column(String, index=True)
     model_name = Column(String)
     colorway = Column(String)
@@ -32,7 +59,7 @@ class Product(Base):
     total_stock = Column(Integer, default=0)
     available_stock = Column(Integer, default=0)
     status = Column(SQLEnum(ProductState), default=ProductState.UPCOMING)
-    is_hyped_drop = Column(Boolean, default=True)
+    is_hyped_drop = Column(Boolean, default=True) 
     drop_start = Column(DateTime, nullable=True)
     drop_end = Column(DateTime, nullable=True)
 
@@ -52,9 +79,6 @@ class Order(Base):
     shoe_id = Column(Integer, ForeignKey("products.id"))
     reservation_id = Column(Integer, ForeignKey("reservations.id"))
     size = Column(String)
-    
-    # NEW: State-Aware Status Column
     status = Column(SQLEnum(OrderState), default=OrderState.PENDING_VERIFICATION)
-    
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     shoe = relationship("Product")

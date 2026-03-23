@@ -59,8 +59,15 @@ export default function StorefrontGrid({ initialDrops }: { initialDrops: Shoe[] 
     setLoadingId(shoeId);
     setErrorMessages(prev => ({ ...prev, [shoeId]: "" })); 
 
+    // --- NEW: Read the actual logged in User ID from the team's auth cookie ---
+    let actualUserId = 1; // Fallback
+    if (typeof document !== 'undefined') {
+      const match = document.cookie.match(/token=mock_token_(\d+)/);
+      if (match) actualUserId = parseInt(match[1]);
+    }
+
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/reserve?user_id=1&shoe_id=${shoeId}`, {
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/reserve?user_id=${actualUserId}&shoe_id=${shoeId}`, {
         method: 'POST',
       });
       const data = await res.json();
