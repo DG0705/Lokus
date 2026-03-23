@@ -17,7 +17,7 @@ interface Shoe {
 export default function StorefrontGrid({ initialDrops }: { initialDrops: Shoe[] }) {
   const router = useRouter();
   
-  // NEW: Convert static props into dynamic local state
+  // FIX #1: Store drops in a dynamic state so they can update!
   const [drops, setDrops] = useState<Shoe[]>(initialDrops);
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,41 +26,38 @@ export default function StorefrontGrid({ initialDrops }: { initialDrops: Shoe[] 
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [errorMessages, setErrorMessages] = useState<Record<number, string>>({});
 
-  const uniqueBrands = ["All", ...Array.from(new Set(initialDrops.map(shoe => shoe.brand)))];
-
-  // ==========================================
-  // NEW: WEBSOCKET LISTENER
-  // ==========================================
+  // FIX #2: Fetch fresh data from FastAPI the millisecond the page loads
   useEffect(() => {
-    // Keep local state in sync if parent passes new props (like after a manual refresh)
-    setDrops(initialDrops);
-    
-    // Open the live tunnel
-   
-const ws = new WebSocket('wss://lokus-engine-xyz.onrender.com/api/v1/ws');
+    // 1. Force a fresh pull to grab newly approved Vendor shoes
+    fetch('http://127.0.0.1:8000/api/v1/drops')
+      .then(res => res.json())
+      .then(data => setDrops(data.live_drops || []))
+      .catch(err => console.error("Could not fetch fresh drops"));
 
+    // 2. Open the WebSocket tunnel for live inventory sync
+    const ws = new WebSocket('ws://127.0.0.1:8000/api/v1/ws');
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      
       if (data.type === 'STOCK_UPDATE') {
         setDrops(prevDrops => prevDrops.map(shoe => {
           if (shoe.id === data.shoe_id) {
-            // Update the specific shoe's stock dynamically!
             return { ...shoe, available_stock: data.available_stock, status: data.status };
           }
           return shoe;
         }));
       }
     };
+    return () => ws.close();
+  }, []);
 
-    return () => ws.close(); // Clean up on unmount
-  }, [initialDrops]);
+  // Update unique brands to use the dynamic drops array
+  const uniqueBrands = ["All", ...Array.from(new Set(drops.map(shoe => shoe.brand)))];
 
   const handleReserve = async (shoeId: number) => {
     setLoadingId(shoeId);
     setErrorMessages(prev => ({ ...prev, [shoeId]: "" })); 
 
-    // --- NEW: Read the actual logged in User ID from the team's auth cookie ---
+    // Extract the actual logged-in user ID from the Auth cookie
     let actualUserId = 1; // Fallback
     if (typeof document !== 'undefined') {
       const match = document.cookie.match(/token=mock_token_(\d+)/);
@@ -81,7 +78,7 @@ const ws = new WebSocket('wss://lokus-engine-xyz.onrender.com/api/v1/ws');
     }
   };
 
-  // Ensure our processedDrops uses the LIVE 'drops' state, not the static 'initialDrops'
+  // FIX #3: Map over `drops` instead of `initialDrops`
   const processedDrops = useMemo(() => {
     let result = drops.filter((shoe) => {
       const matchesSearch = shoe.model_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -93,7 +90,7 @@ const ws = new WebSocket('wss://lokus-engine-xyz.onrender.com/api/v1/ws');
     if (sortBy === "PriceLowHigh") result.sort((a, b) => a.price_inr - b.price_inr);
     if (sortBy === "PriceHighLow") result.sort((a, b) => b.price_inr - a.price_inr);
     return result;
-  }, [searchTerm, filterBrand, sortBy, drops]);
+  }, [searchTerm, filterBrand, sortBy, drops]); // Make sure it watches `drops`
 
   return (
     <section className="py-12 border-t border-stone-300 relative">
@@ -114,7 +111,6 @@ const ws = new WebSocket('wss://lokus-engine-xyz.onrender.com/api/v1/ws');
       <div className="flex justify-between items-end mb-8 relative z-10">
         <div className="flex items-center gap-3">
           <h3 className="text-4xl font-black uppercase tracking-tighter text-stone-900">Live Drops</h3>
-          {/* Live indicator showing WebSockets are active */}
           <span className="bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border border-green-200 flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
             Sync Active
@@ -133,7 +129,6 @@ const ws = new WebSocket('wss://lokus-engine-xyz.onrender.com/api/v1/ws');
               <div className="h-64 mb-5 overflow-hidden rounded-2xl bg-neutral-100 flex items-center justify-center relative">
                 <img src={shoe.image_url} alt={shoe.model_name} className={`object-cover w-full h-full mix-blend-darken transition-all ${isSoldOut ? 'opacity-50 grayscale' : ''}`} />
                 
-                {/* Dynamic Live Stock Badge */}
                 <div className={`absolute top-4 right-4 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-md transition-colors ${
                   isSoldOut ? 'bg-stone-200 text-stone-500' : 
                   shoe.available_stock <= 3 ? 'bg-red-600 text-white animate-pulse' : 
