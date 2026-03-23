@@ -22,7 +22,7 @@ export default function VaultPage() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/users/1/orders');
+        const res = await fetch('https://lokus-8cbg.onrender.com/api/v1/users/1/orders');
         const data = await res.json();
         setOrders(data.order_history || []);
       } catch (error) {

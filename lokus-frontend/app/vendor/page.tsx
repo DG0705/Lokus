@@ -29,7 +29,7 @@ export default function VendorDashboard() {
         total_stock: parseInt(newProduct.total_stock),
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/vendor/products', {
+      const res = await fetch('https://lokus-8cbg.onrender.com/api/v1/vendor/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

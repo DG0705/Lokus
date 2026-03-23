@@ -17,7 +17,7 @@ export default function CheckoutPage() {
   const sizes = ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"];
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/v1/reservations/${id}`)
+    fetch(`https://lokus-8cbg.onrender.com/api/v1/reservations/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.detail) setError(data.detail);
@@ -57,7 +57,7 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/checkout/${id}`, {
+      const res = await fetch(`https://lokus-8cbg.onrender.com/api/v1/checkout/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ size: selectedSize })

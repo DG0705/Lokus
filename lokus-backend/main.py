@@ -19,7 +19,7 @@ app = FastAPI(title="Lokus State Engine & API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"], # For production, you can restrict this later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

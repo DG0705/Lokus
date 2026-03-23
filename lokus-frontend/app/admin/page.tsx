@@ -24,16 +24,16 @@ export default function AdminDashboard() {
     const fetchDashboardData = async () => {
       try {
         // 1. Fetch Stats
-        const statsRes = await fetch('http://127.0.0.1:8000/api/v1/admin/stats');
+        const statsRes = await fetch('https://lokus-8cbg.onrender.com/api/v1/admin/stats');
         setStats(await statsRes.json());
         
         // 2. Fetch Orders Pipeline
-        const ordersRes = await fetch('http://127.0.0.1:8000/api/v1/admin/orders');
+        const ordersRes = await fetch('https://lokus-8cbg.onrender.com/api/v1/admin/orders');
         const ordersData = await ordersRes.json();
         setOrders(ordersData.orders || []);
 
         // 3. Fetch Escrow Pending Products
-        const pendingRes = await fetch('http://127.0.0.1:8000/api/v1/admin/pending-products');
+        const pendingRes = await fetch('https://lokus-8cbg.onrender.com/api/v1/admin/pending-products');
         const pendingData = await pendingRes.json();
         setPendingProducts(pendingData.pending_products || []);
       } catch (err) {
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
     setIsSweeping(true);
     setSweepLog(null);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/admin/force-sweep', { method: 'POST' });
+      const res = await fetch('https://lokus-8cbg.onrender.com/api/v1/admin/force-sweep', { method: 'POST' });
       const data = await res.json();
       if (data.swept_count > 0) setSweepLog(`Reclaimed ${data.swept_count} carts. Restocked: ${data.restocked.join(', ')}`);
       else setSweepLog("System Optimal. No expired carts found.");
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
     if (duration === null) return; 
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/products/${productId}/approve`, {
+      const res = await fetch(`https://lokus-8cbg.onrender.com/api/v1/admin/products/${productId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ delay_minutes: parseInt(delay), duration_hours: parseInt(duration) })
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
 
   const handleStateTransition = async (orderId: number, newState: string) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/orders/${orderId}/transition`, {
+      const res = await fetch(`https://lokus-8cbg.onrender.com/api/v1/admin/orders/${orderId}/transition`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ new_state: newState })
       });
       if (!res.ok) {
