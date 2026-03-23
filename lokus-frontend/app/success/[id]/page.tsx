@@ -3,19 +3,12 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import confetti from 'canvas-confetti'; // Run: npm install canvas-confetti @types/canvas-confetti
+
 
 export default function SuccessPage() {
   const { id } = useParams();
 
-  useEffect(() => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#16a34a', '#000000', '#ffffff']
-    });
-  }, []);
+
 
   return (
     <main className="min-h-screen bg-stone-900 flex items-center justify-center p-4 md:p-8 font-sans">
