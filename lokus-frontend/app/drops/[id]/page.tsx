@@ -18,7 +18,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     // Fetch the reserved shoe details
-    fetch(`https://lokus-8cbg.onrender.com/api/v1/reservations/${id}`)
+    fetch(`http://127.0.0.1:8000/api/v1/reservations/${id}`)
       .then(res => res.json())
       .then(data => {
         if (data.detail) {
@@ -54,7 +54,7 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      const res = await fetch(`https://lokus-8cbg.onrender.com/api/v1/checkout/${id}`, {
+      const res = await fetch(`http://127.0.0.1:8000/api/v1/checkout/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ size: selectedSize })

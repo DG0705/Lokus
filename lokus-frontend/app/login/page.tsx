@@ -1,126 +1,81 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Lock, Mail, ArrowRight } from 'lucide-react';
 
-export default function Login() {
+export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch('https://lokus-8cbg.onrender.com/api/v1/auth/login', {
+      const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
+        body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Invalid credentials');
-      }
-
       const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || 'Login failed');
+
+      document.cookie = `token=${data.access_token}; path=/; max-age=86400; SameSite=Strict`;
+      document.cookie = `role=${data.role}; path=/; max-age=86400; SameSite=Strict`;
       
-      // Store the auth token in a cookie so the middleware can read it
-      document.cookie = `token=${data.access_token || 'authenticated'}; path=/; max-age=86400; SameSite=Strict`;
-      document.cookie = `role=${data.role || 'customer'}; path=/; max-age=86400; SameSite=Strict`;
-      // --- DYNAMIC REDIRECT BASED ON ROLE ---
-      if (data.role === 'supplier') {
-        router.push('/vendor');
-      } else {
-        router.push('/');
-      }
+      if (data.role === 'admin') router.push('/admin');
+      else if (data.role === 'supplier') router.push('/vendor');
+      else router.push('/');
       
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-stone-900 rounded-2xl border border-stone-800 p-8 shadow-2xl">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-extrabold tracking-tighter text-white mb-2 uppercase">Lokus.</h1>
-            <p className="text-stone-400 font-medium">Access the ultimate sneaker hub</p>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <Link href="/" className="flex justify-center mb-6">
+          <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-lg"><span className="text-white font-bold text-2xl">L</span></div>
+        </Link>
+        <h2 className="text-center text-4xl font-black text-gray-900 tracking-tight">Welcome back</h2>
+        <p className="mt-2 text-center text-sm text-gray-600 font-medium">Don't have an account? <Link href="/register" className="font-bold text-black hover:underline">Register here</Link></p>
+      </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-xl mb-6 text-sm font-bold">
-              {error}
-            </div>
-          )}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-10 px-8 shadow-xl border border-gray-100 rounded-3xl">
+          {error && <div className="mb-6 bg-red-50 text-red-600 border border-red-100 p-4 rounded-xl text-sm font-bold text-center">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition font-medium"
-                disabled={isLoading}
-              />
+              <label className="block text-sm font-bold text-gray-700 mb-2">Email address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Mail className="h-5 w-5 text-gray-400" /></div>
+                <input required type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="block w-full pl-11 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent font-medium transition-all" placeholder="you@example.com" />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-bold text-stone-300 mb-2 uppercase tracking-wide">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 bg-stone-800 border border-stone-700 rounded-xl text-white placeholder-stone-500 focus:outline-none focus:border-stone-400 focus:ring-1 focus:ring-stone-400 transition font-medium"
-                disabled={isLoading}
-              />
+              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Lock className="h-5 w-5 text-gray-400" /></div>
+                <input required type="password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className="block w-full pl-11 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent font-medium transition-all" placeholder="••••••••" />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-white text-stone-950 font-black uppercase tracking-widest py-4 rounded-xl hover:bg-stone-200 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2 shadow-lg"
-            >
-              {isLoading ? 'Authenticating...' : 'Sign In'}
+            <button type="submit" disabled={isLoading} className="w-full flex justify-center items-center gap-2 bg-black text-white py-4 px-4 rounded-xl font-bold hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all disabled:opacity-50 shadow-lg mt-2">
+              {isLoading ? 'Authenticating...' : <>Sign In <ArrowRight className="w-5 h-5" /></>}
             </button>
           </form>
-
-          <p className="text-center text-stone-400 text-sm mt-8 font-medium">
-            Don't have an account?{' '}
-            <Link href="/register" className="text-white hover:text-stone-200 font-bold transition underline decoration-stone-600 underline-offset-4">
-              Register now
-            </Link>
-          </p>
         </div>
       </div>
     </div>

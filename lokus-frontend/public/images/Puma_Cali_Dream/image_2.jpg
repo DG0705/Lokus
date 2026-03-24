@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+  <link rel="preload" href="/includes/templates/responsive_classic/css/stylesheet.css" as="style" />
+  <link rel="preload" href="/includes/templates/responsive_classic/css/responsive.css" as="style" />
+  <link rel="preload" href="/includes/templates/responsive_classic/jscript/jquery.min.js" as="script" />
+
+  <link rel="preload" href="/includes/templates/responsive_classic/css/responsive_default.css" as="style" />
+ 
+
+
+  <meta charset="utf-8">
+  <title>Young Sneaker for Sale</title>
+  <meta name="description" content="Young Sneaker offers factory clearance shoes that carry quality tales and satisfy your wallet with great deals." />
+      <meta property="og:title" content="Young Sneaker for Sale"/>
+      <meta property="og:description" content="Young Sneaker offers factory clearance shoes that carry quality tales and satisfy your wallet with great deals."/>
+  <meta name="author" content="Young Sneaker" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes"/>
+
+
+  <base href="https://www.youngsneaker.com/" />
+  <link rel="canonical" href="https://www.youngsneaker.com/" />
+
+<link rel="stylesheet" type="text/css" href="includes/templates/responsive_classic/css/stylesheet.css" />
+<link rel="stylesheet" type="text/css" href="includes/templates/responsive_classic/css/stylesheet_colors.css" />
+<link rel="stylesheet" type="text/css" href="includes/templates/responsive_classic/css/stylesheet_css_buttons.css" />
+<link rel="stylesheet" type="text/css" href="includes/templates/responsive_classic/css/stylesheet_zen_colorbox.css" />
+<link rel="stylesheet" type="text/css" media="print" href="includes/templates/responsive_classic/css/print_stylesheet.css" />
+<script type="text/javascript" src="includes/templates/responsive_classic/jscript/jquery.min.js"></script>
+<script type="text/javascript" src="includes/templates/responsive_classic/jscript/jscript_matchHeight-min.js"></script>
+<script>
+if (typeof zcJS == "undefined" || !zcJS) {
+  window.zcJS = { name: 'zcJS', version: '0.1.0.0' };
+}
+
+zcJS.ajax = function (options) {
+  options.url = options.url.replace("&amp;", unescape("&amp;"));
+  var deferred = jQuery.Deferred(function (d) {
+      var securityToken = '8b3302c893794388c045ade2097a6ca1';
+      var defaults = {
+          cache: false,
+          type: 'POST',
+          traditional: true,
+          dataType: 'json',
+          timeout: 5000,
+          data: jQuery.extend(true,{
+            securityToken: securityToken
+        }, options.data)
+      },
+      settings = jQuery.extend(true, {}, defaults, options);
+      if (typeof(console.log) == 'function') {
+          console.log( settings );
+      }
+
+      d.done(settings.success);
+      d.fail(settings.error);
+      d.done(settings.complete);
+      var jqXHRSettings = jQuery.extend(true, {}, settings, {
+          success: function (response, textStatus, jqXHR) {
+            d.resolve(response, textStatus, jqXHR);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+              if (window.console) {
+                if (typeof(console.log) == 'function') {
+                  console.log(jqXHR);
+                }
+              }
+              d.reject(jqXHR, textStatus, errorThrown);
+          },
+          complete: d.resolve
+      });
+      jQuery.ajax(jqXHRSettings);
+   }).fail(function(jqXHR, textStatus, errorThrown) {
+   var response = jqXHR.getResponseHeader('status');
+   var responseHtml = jqXHR.responseText;
+   var contentType = jqXHR.getResponseHeader("content-type");
+   switch (response)
+     {
+       case '403 Forbidden':
+         var jsonResponse = JSON.parse(jqXHR.responseText);
+         var errorType = jsonResponse.errorType;
+         switch (errorType)
+         {
+           case 'ADMIN_BLOCK_WARNING':
+           break;
+           case 'AUTH_ERROR':
+           break;
+           case 'SECURITY_TOKEN':
+           break;
+
+           default:
+             alert('An Internal Error of type '+errorType+' was received while processing an ajax call. The action you requested could not be completed.');
+         }
+       break;
+       default:
+        if (jqXHR.status === 200) {
+            if (contentType.toLowerCase().indexOf("text/html") >= 0) {
+                document.open();
+                document.write(responseHtml);
+                document.close();
+            }
+         }
+     }
+   });
+
+  var promise = deferred.promise();
+  return promise;
+};
+zcJS.timer = function (options) {
+  var defaults = {
+    interval: 10000,
+    startEvent: null,
+    intervalEvent: null,
+    stopEvent: null
+
+},
+  settings = jQuery.extend(true, {}, defaults, options);
+
+  var enabled = new Boolean(false);
+  var timerId = 0;
+  var mySelf;
+  this.Start = function()
+  {
+      this.enabled = new Boolean(true);
+
+      mySelf = this;
+      mySelf.settings = settings;
+      if (mySelf.enabled)
+      {
+          mySelf.timerId = setInterval(
+          function()
+          {
+              if (mySelf.settings.intervalEvent)
+              {
+                mySelf.settings.intervalEvent(mySelf);
+              }
+          }, mySelf.settings.interval);
+          if (mySelf.settings.startEvent)
+          {
+            mySelf.settings.startEvent(mySelf);
+          }
+      }
+  };
+  this.Stop = function()
+  {
+    mySelf.enabled = new Boolean(false);
+    clearInterval(mySelf.timerId);
+    if (mySelf.settings.stopEvent)
+    {
+      mySelf.settings.stopEvent(mySelf);
+    }
+  };
+};
+
+</script>
+
+<script type="text/javascript">
+if (typeof jQuery == 'undefined') {
+    document.write('script type="text/javascript" src="//code.jquery.com/jquery-1.12.4.min.js"><\/script>');
+}
+</script>
+
+
+<script type="text/javascript">
+
+(function($) {
+$(document).ready(function() {
+
+$('#contentMainWrapper').addClass('onerow-fluid');
+ $('#mainWrapper').css({
+     'max-width': '100%',
+     'margin': 'auto'
+ });
+ $('#headerWrapper').css({
+     'max-width': '100%',
+     'margin': 'auto'
+ });
+ $('#navSuppWrapper').css({
+     'max-width': '100%',
+     'margin': 'auto'
+ });
+
+
+$('.leftBoxContainer').css('width', '');
+$('.rightBoxContainer').css('width', '');
+$('#mainWrapper').css('margin', 'auto');
+
+$('a[href="#top"]').click(function(){
+$('html, body').animate({scrollTop:0}, 'slow');
+return false;
+});
+
+$(".categoryListBoxContents").click(function() {
+window.location = $(this).find("a").attr("href"); 
+return false;
+});
+
+$('.centeredContent').matchHeight();
+$('.specialsListBoxContents').matchHeight();
+$('.centerBoxContentsAlsoPurch').matchHeight();
+$('.categoryListBoxContents').matchHeight();
+
+$('.no-fouc').removeClass('no-fouc');
+});
+
+}) (jQuery);
+
+</script>
+
+<link rel="stylesheet" type="text/css" href="includes/templates/responsive_classic/css/responsive.css" /><link rel="stylesheet" type="text/css" href="includes/templates/responsive_classic/css/responsive_default.css" />  <script type="text/javascript">document.documentElement.className = 'no-fouc';</script>
+  <link rel="preload" href="includes/templates/responsive_classic/css/font-awesome-05.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+<noscript><link rel="stylesheet" href="includes/templates/responsive_classic/css/font-awesome-05.min.css" /></noscript>
+<style>
+.fa{display:inline-block;font:normal normal normal 14px/1 FontAwesome;font-size:inherit;text-rendering:auto;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.fa-home:before{content:"\f015"}.fa-list:before{content:"\f03a"}.fa-sign-in:before{content:"\f090"}.fa-arrow-circle-up:before{content:"\f0aa"}.fa-navicon:before,.fa-reorder:before,.fa-bars:before{content:"\f0c9"}.fa-chevron-circle-left:before{content:"\f137"}.fa-chevron-circle-right:before{content:"\f138"}.fa-4x{font-size:4em}.fa-search:before{content:"\f002"}.fa-shopping-cart:before{content:"\f07a"}.fa-check-square:before{content:"\f14a"}.fa-star:before{content:"\f005"}.fa-twitter-square:before{content:"\f081"}.fa-star-half:before{content:"\f089"}.fa-pinterest:before{content:"\f0d2"}.fa-youtube-square:before{content:"\f166"}.fa-instagram:before{content:"\f16d"}.fa-facebook-official:before{content:"\f230"}.fa-rss-square:before{content:"\f143"}
+</style>
+</head>
+
+
+<body id="indexHomeBody">
+
+
+
+<div id="mainWrapper">
+
+
+
+<!--bof-header logo and navigation display-->
+
+<div id="headerWrapper">
+
+<!--bof navigation display-->
+<div id="navMainWrapper" class="group onerow-fluid">
+
+<div id="navMain">
+  <ul class="back">
+    <li><a href="https://www.youngsneaker.com/">Home</a></li>
+    <li class="last"><a href="https://www.youngsneaker.com/login">Log In</a></li>
+
+  </ul>
+<div id="navMainSearch" class="forward">
+     <form name="quick_find_header" action="https://www.youngsneaker.com/advanced-search-result" method="get"><input type="hidden" name="main_page" value="advanced_search_result" /><input type="hidden" name="search_in_description" value="1" /><input type="text" name="keyword" size="6" maxlength="30" style="width: 100px" placeholder="Enter search keywords here" aria-label="Enter search keywords here"  />&nbsp;<input class="cssButton submit_button button  button_search" onmouseover="this.className='cssButtonHover  button_search button_searchHover'" onmouseout="this.className='cssButton submit_button button  button_search'" type="submit" value="Search" /></form></div>
+</div>
+</div>
+<!--eof navigation display-->
+
+
+<!--bof branding display-->
+<div id="logoWrapper" class="group onerow-fluid">
+    <div id="logo"><a href="https://www.youngsneaker.com/"><picture><source srcset="includes/templates/responsive_classic/images/young-sneaker-logo.webp" type="image/webp"><img src="includes/templates/responsive_classic/images/young-sneaker-logo.png" alt="Young Sneaker" title="Young Sneaker" width="192" height="53" decoding="async" /></picture></a>  </div>
+</div>
+
+<!--eof branding display-->
+<!--eof header logo and navigation display-->
+
+
+<!--bof optional categories tabs navigation display-->
+<div id="navCatTabsWrapper">
+<div id="navCatTabs">
+<ul>
+  <li><a class="category-top" href="https://www.youngsneaker.com/adidas-sports-shoes">adidas</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/asics">Asics</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/nike">Nike</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/puma-shoes-online">Puma</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/reebok-shoes-online">Reebok</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/salomon">Salomon</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/under-armour-sneakers">Under Armour</a> </li>
+  <li><a class="category-top" href="https://www.youngsneaker.com/hoka">Hoka One One</a> </li>
+</ul>
+</div>
+</div>
+<!--eof optional categories tabs navigation display-->
+
+<!--bof header ezpage links-->
+<!--eof header ezpage links-->
+</div>
+
+
+<div id="contentMainWrapper">
+
+
+  <div class="col970" style="max-width: 100%;">
+
+<!-- bof  breadcrumb -->
+<!-- eof breadcrumb -->
+
+<!-- bof upload alerts -->
+<!-- eof upload alerts -->
+
+<div class="centerColumn" id="indexDefault">
+<h1 id="indexDefaultHeading">Young Sneaker</h1>
+
+
+<div id="indexDefaultMainContent" class="content"><div style="float: left; margin-right: 5px;"><a href="https://www.youngsneaker.com/adidas-trae-young-ice"><img src="bmz_cache/2/2108adidas-trae-youngs-icee-shoesjpg.image.320x200.jpg" alt="Trae Young Shoes" title="Trae Young Shoes" width="262" height="auto" loading="eager" fetchpriority="high" srcset="bmz_cache/2/2108adidas-trae-youngs-icee-shoesjpg.image.320x200.jpg 320w,bmz_cache/2/2108adidas-trae-youngs-icee-shoesjpg.image.750x469.jpg 750w,images/2108adidas/trae-youngs-icee-shoes.jpg 1000w"></a></div>
+<p style="font-size: 1.5em;line-height: 1.5em;">Young Sneaker brings you factory-cleared Salomon, Puma, Reebok and Under Armour classics: every pair tells a quality tale of iconic design, now offered at wallet-pleasing deals that make premium footwear accessible to all.
+</p></div>
+
+
+
+<!-- bof: featured products  -->
+<div class="centerBoxWrapper" id="featuredProducts">
+<h2 class="centerBoxHeading">You Might Also Like</h2>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/adidas/adidas-men/adidas-samba-og-shoes-multicolor"><img src="bmz_cache/a/adidas-samba-og-shoes-multicolor-bz0064_01jpg.image.260x260.jpg" alt="adidas Samba OG Shoes Multicolor" title="adidas Samba OG Shoes Multicolor" width="260" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/adidas/adidas-men/adidas-samba-og-shoes-multicolor">adidas Samba OG Shoes Multicolor</a><br /><span class="productSalePrice">$66.00</span><span class="normalprice">$100.00 </span><span class="productPriceDiscount">34% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 888</span></div>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/under-charged-24-7-low"><img src="bmz_cache/1/1288347-941_defaultjpg.image.244x260.jpg" alt="Under Armour Charged 24/7 Low Lightweight Shoes" title="Under Armour Charged 24/7 Low Lightweight Shoes" width="244" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/under-charged-24-7-low">Under Armour Charged 24/7 Low Lightweight Shoes</a><br /><span class="productSalePrice">$55.99</span><span class="normalprice">$79.99 </span><span class="productPriceDiscount">30% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star-half" style="color:#2d2d2d !important;"></i> 798</span></div>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/ua-charged-all-day-steel-shoes"><img src="bmz_cache/3/3020114-100jpg.image.244x260.jpg" alt="UA Charged All-Day Steel / Overcast Gray" title="UA Charged All-Day Steel / Overcast Gray" width="244" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/ua-charged-all-day-steel-shoes">UA Charged All-Day Steel / Overcast Gray</a><br /><span class="productSalePrice">$54.40</span><span class="normalprice">$80.00 </span><span class="productPriceDiscount">32% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 64</span></div>
+
+
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/under-armour-lockdown-shoes"><img src="bmz_cache/1/1269281-100_defaultjpg.image.244x260.jpg" alt="Under Armour Lockdown Shoes" title="Under Armour Lockdown Shoes" width="244" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/under-armour-lockdown-shoes">Under Armour Lockdown Shoes</a><br /><span class="productSalePrice">$48.09</span><span class="normalprice">$64.99 </span><span class="productPriceDiscount">26% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star-half" style="color:#2d2d2d !important;"></i> 59</span></div>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/reebok/mens-crossfit/reebok-speed-tr-crossfit"><img src="bmz_cache/a/ar3199_01jpg.image.260x260.jpg" alt="Reebok Speed TR CrossFit Shoes" title="Reebok Speed TR CrossFit Shoes" width="260" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/reebok/mens-crossfit/reebok-speed-tr-crossfit">Reebok Speed TR CrossFit Shoes</a><br />&nbsp;<span class="productSpecialPrice">$59.99</span><span class="normalprice">$99.98 </span><span class="productPriceDiscount">40% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 412</span></div>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/asics-gel-dedicate-7"><img src="bmz_cache/2/2212asics-asics-gel-dedicate-7-1041a223jpg.image.260x195.jpg" alt="Asics GEL Dedicate 7" title="Asics GEL Dedicate 7" width="260" height="195"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/asics-gel-dedicate-7">Asics GEL Dedicate 7</a><br /><span class="productSalePrice">$49.00</span><span class="normalprice">$70.00 </span><span class="productPriceDiscount">30% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 195</span></div>
+
+
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/adidas/womens-shoes/adidas-superstar-slip-on-shoes-green"><img src="bmz_cache/a/adidas-superstar-slip-on-shoes-green-bz0647_01jpg.image.260x260.jpg" alt="adidas Superstar Slip-on Shoes Green" title="adidas Superstar Slip-on Shoes Green" width="260" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/adidas/womens-shoes/adidas-superstar-slip-on-shoes-green">adidas Superstar Slip-on Shoes Green</a><br /><span class="productSalePrice">$48.10</span><span class="normalprice">$65.00 </span><span class="productPriceDiscount">26% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 327</span></div>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/ua-Shoes-3019827-100"><img src="bmz_cache/3/3019827-100jpg.image.244x260.jpg" alt="UA Charged 24/7 NU Rhino Gray / Ivory" title="UA Charged 24/7 NU Rhino Gray / Ivory" width="244" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/ua-Shoes-3019827-100">UA Charged 24/7 NU Rhino Gray / Ivory</a><br /><span class="productSalePrice">$55.99</span><span class="normalprice">$79.99 </span><span class="productPriceDiscount">30% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 91</span></div>
+    <div class="centerBoxContentsFeatured centeredContent back" style="width:33%;"><a href="https://www.youngsneaker.com/ua-bam-valor-faded-shoes"><img src="bmz_cache/3/3020665-400jpg.image.244x260.jpg" alt="UA BAM Valor Shoes" title="UA BAM Valor Shoes" width="244" height="260"  loading="lazy" decoding="async" /></a><br /><a href="https://www.youngsneaker.com/ua-bam-valor-faded-shoes">UA BAM Valor Shoes</a><br /><span class="productSalePrice">$57.80</span><span class="normalprice">$85.00 </span><span class="productPriceDiscount">32% off</span><br/><br/><span class="reviewsss"><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i><i class="fa fa-star" style="color:#2d2d2d !important;"></i> 133</span></div>
+
+</div>
+<!-- eof: featured products  -->
+
+
+
+
+
+</div>
+  </div>
+
+
+
+</div>
+
+
+
+<!--bof-navigation display -->
+<div id="navSuppWrapper" style="clear:both;">
+<div id="navSupp">
+<ul>
+<li><a href="https://www.youngsneaker.com/">Home</a></li>
+  <li><a href="https://www.youngsneaker.com/shippinginfo">Shipping & Returns</a></li>
+  <li><a href="https://www.youngsneaker.com/shippinginfo">Payment & Refund</a></li>
+  <li><a href="https://www.youngsneaker.com/privacy">Privacy policy</a></li>
+  <li><a href="https://www.youngsneaker.com/contact-us">Contact US</a></li>
+</ul>
+</div>
+</div>
+<!--eof-navigation display -->
+
+<!--bof-ip address display -->
+<!--eof-ip address display -->
+
+<!--bof-banner #5 display -->
+<!--eof-banner #5 display -->
+
+<!--bof- site copyright display -->
+<div id="siteinfoLegal" class="legalCopyright" style="clear:both;">
+&copy; 2026 Young Sneaker. All rights reserved.<br/>
+
+<a href="https://www.youngsneaker.com/privacy" rel="nofollow">Privacy Policy</a> 
+<a href="https://www.youngsneaker.com/conditions" rel="nofollow">Terms of Use</a><br/>
+<p>
+Young Sneaker is not affiliated with Nike, or any of its subsidiaries.<br/>
+
+Young Sneaker is an independent Sneakers dealer and is not sponsored by, associated with and/or affiliated with Nike, Under Armour, or any other brand listed on its website. Young Sneaker sells only Factory Surplus/Stock/Clearance Shoes.
+</p>
+<a href="https://usa.visa.com/" target="_blank" ><i class="fa fa-cc-visa" title="Visa"></i></a>
+<a href="https://www.mastercard.us/" target="_blank" ><i class="fa fa-cc-mastercard" title="discover"></i></a>
+<a href="https://www.facebook.com/YoungSheakers/" target="_blank" ><i class="fa fa-facebook-official" title="facebook"></i></a>
+<a href="https://www.instagram.com/youngsneakercity/" target="_blank" ><i class="fa fa-instagram" title="instagram"></i></a>
+
+
+<a href="https://www.youngsneaker.com/rss-feed?feed=new_products" title="RSS New Products Feed" target="_blank" rel="nofollow"><i class="fa fa-rss-square" title="RSS"></i></a>
+<br/>
+201</div>
+<!--eof- site copyright display -->
+<script title="Structured Data: schemaBreadcrumb" type="application/ld+json">
+{
+"@context": "http://schema.org",
+"@type": "BreadcrumbList",
+"itemListElement": [
+      {
+   "@type": "ListItem",
+   "position": 1,
+   "item": {
+   "@id": "https://www.youngsneaker.com/",
+   "name": "Home"
+           }
+    }
+                    ]
+}
+</script>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Place","@id":"https://www.youngsneaker.com/#place","geo":{"@type":"GeoCoordinates","latitude":"39.97446","longitude":"-75.18160"},"hasMap":"https://www.google.com/maps/search/?api=1&query=39.97446,-75.18160","address":{"@type":"PostalAddress","streetAddress":"2735 W Girard Ave","addressLocality":"Philadelphia","addressRegion":"PA","postalCode":"19130","addressCountry":"US"}},{"@type":"ShoeStore","@id":"https://www.youngsneaker.com/#organization","name":"Young Sneaker","url":"https://www.youngsneaker.com","email":"support7@bsbmail.com","address":{"@type":"PostalAddress","streetAddress":"2735 W Girard Ave","addressLocality":"Philadelphia","addressRegion":"PA","postalCode":"19130","addressCountry":"US"},"logo":{"@type":"ImageObject","@id":"https://www.youngsneaker.com/#logo","url":"https://www.youngsneaker.com/includes/templates/responsive_classic/images/young-sneaker-logo.png","contentUrl":"https://www.youngsneaker.com/includes/templates/responsive_classic/images/young-sneaker-logo.png","caption":"Young Sneaker","inLanguage":"en-US","width":"993","height":"277"},"priceRange":"$50 - $360","openingHours":["Monday,Tuesday,Wednesday,Thursday,Friday,Saturday 10:15-17:00","Sunday 11:00-16:00"],"description":"Shoe Store. We offer a variety of popular and best-selling sneakers, plus basketball, football, running shoes, and more!","numberOfEmployees":{"@type":"QuantitativeValue","value":"100"},"location":{"@id":"https://www.youngsneaker.com/#place"},"image":{"@id":"https://www.youngsneaker.com/#logo"},"telephone":"+1-215-236-2810"},{"@type":"WebSite","@id":"https://www.youngsneaker.com/#website","url":"https://www.youngsneaker.com","name":"Young Sneaker","alternateName":"Young Sneaker","publisher":{"@id":"https://www.youngsneaker.com/#organization"},"inLanguage":"en-US"},{"@type":"CollectionPage","@id":"https://www.youngsneaker.com/#webpage","url":"https://www.youngsneaker.com/","name":"Young Sneaker for Sale","about":{"@id":"https://www.youngsneaker.com/#organization"},"isPartOf":{"@id":"https://www.youngsneaker.com/#website"},"inLanguage":"en-US"}
+]}</script>
+<style>
+.to_top{
+    bottom:1px;
+    position:fixed;
+    position:absolute; 
+    cursor:pointer;
+    background-color: #FFFFFF;
+    color: #000000;
+    opacity: 1.0;
+    padding: 1px;
+    position: fixed;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.1s ease-in-out 0s;
+    width: 99.9%;
+    height: 99.9%;
+    z-index: 1001;}
+</style>
+<div class="to_top">
+<p>
+<br/><br/><br/><br/>
+Young Sneaker site is currently down for maintenance. 
+<br/><br/><br/><br/>
+Please excuse the dust, and try back later.
+<br/><br/><br/><br/>
+If you have any additional questions or comments, we would love to hear from you!
+2026-03-23 19:30:43</p>
+</div>
+
+
+</div>
+<!--bof- banner #6 display -->
+<!--eof- banner #6 display -->
+
+
+
+
+ 
+
+
+</body>
+</html>

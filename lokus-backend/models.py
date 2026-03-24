@@ -82,3 +82,24 @@ class Order(Base):
     status = Column(SQLEnum(OrderState), default=OrderState.PENDING_VERIFICATION)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     shoe = relationship("Product")
+
+from sqlalchemy import Column, String, Float
+
+class StaticShoe(Base):
+    __tablename__ = "shoes"
+    
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String)
+    price = Column(Float)
+    color = Column(String)
+    material = Column(String)
+    closure = Column(String)
+    heel = Column(String)
+    water_resistance = Column(String)
+    sole_material = Column(String)
+    style = Column(String)
+    manufacturer = Column(String)
+    front_img = Column(String)
+    back_img = Column(String)
+    side_img = Column(String)
+    top_img = Column(String)

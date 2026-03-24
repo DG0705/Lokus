@@ -198,7 +198,7 @@ def reserve_shoe(user_id: int, shoe_id: int, background_tasks: BackgroundTasks, 
         shoe.available_stock -= 1
         if shoe.available_stock == 0: shoe.status = models.ProductState.SOLD_OUT
             
-        new_res = models.Reservation(user_id=user_id, shoe_id=shoe_id, expires_at=datetime.now(timezone.utc) + timedelta(minutes=1 if shoe.is_hyped_drop else 15))
+        new_res = models.Reservation(user_id=user_id, shoe_id=shoe_id, expires_at=datetime.now(timezone.utc) + timedelta(minutes=0.5 if shoe.is_hyped_drop else 15))
         db.add(new_res)
         db.commit()
         db.refresh(new_res)
@@ -223,8 +223,22 @@ def complete_checkout(res_id: int, req: CheckoutRequest, db: Session = Depends(g
 
 @app.get("/api/v1/reservations/{res_id}")
 def get_reservation_details(res_id: int, db: Session = Depends(get_db)):
+    """Fetches the locked shoe details AND user shipping info for the checkout page."""
     res = db.query(models.Reservation).filter(models.Reservation.id == res_id).first()
-    return {"reservation": res, "shoe": db.query(models.Product).filter(models.Product.id == res.shoe_id).first()}
+    if not res: 
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    
+    shoe = db.query(models.Product).filter(models.Product.id == res.shoe_id).first()
+    user = db.query(models.User).filter(models.User.id == res.user_id).first()
+    
+    return {
+        "reservation": res, 
+        "shoe": shoe,
+        "user": {
+            "address": user.address if user else "Address not found",
+            "pincode": user.pincode if user else "---"
+        }
+    }
 
 @app.get("/api/v1/users/{user_id}/orders")
 def get_user_vault(user_id: int, db: Session = Depends(get_db)):
@@ -267,29 +281,57 @@ class VendorProductCreate(BaseModel):
     image_url: str
     total_stock: int
 
+# 1. THE VENDOR UPLOAD ENDPOINT
 @app.post("/api/v1/vendor/products")
-def vendor_upload_product(product: VendorProductCreate, db: Session = Depends(get_db)):
-    """Supplier uploads an asset. It is locked in PENDING_APPROVAL until Admin reviews it."""
+def vendor_upload_product(payload: dict, db: Session = Depends(get_db)):
+    """Receives vendor asset and forces it into the Escrow Queue"""
     try:
-        new_product = models.Product(
-            supplier_id=product.supplier_id, brand=product.brand, model_name=product.model_name,
-            colorway=product.colorway, price_inr=product.price_inr, image_url=product.image_url,
-            total_stock=product.total_stock, available_stock=product.total_stock,
-            status=models.ProductState.PENDING_APPROVAL, is_hyped_drop=True 
+        new_shoe = models.Product(
+            brand=payload.get("brand", "Unknown"),
+            model_name=payload.get("model_name", "Unknown"),
+            colorway=payload.get("colorway", "Standard"),
+            price_inr=payload.get("price_inr", 0),
+            image_url=payload.get("image_url", ""),
+            available_stock=payload.get("total_stock", 0), 
+            
+            # This is the magic lock! It ensures the Admin page sees it.
+            status="PENDING_APPROVAL" 
         )
-        db.add(new_product)
+        db.add(new_shoe)
         db.commit()
-        db.refresh(new_product)
-        return {"message": "Asset submitted to Escrow Review!", "product_id": new_product.id}
+        db.refresh(new_shoe)
+        
+        return {"message": "Asset secured in Escrow", "product_id": new_shoe.id}
     except Exception as e:
         db.rollback()
+        print(f"Vendor Upload Error: {e}") # This will print exact errors to your terminal now
         raise HTTPException(status_code=500, detail=str(e))
 
+# 2. THE ADMIN ESCROW QUEUE ENDPOINT
 @app.get("/api/v1/admin/pending-products")
-def get_pending_products(db: Session = Depends(get_db)):
-    """Admin fetches all assets waiting in the escrow queue."""
-    pending = db.query(models.Product).filter(models.Product.status == models.ProductState.PENDING_APPROVAL).all()
-    return {"pending_products": pending}
+def get_pending_escrow_products(db: Session = Depends(get_db)):
+    """Fetches ONLY assets that have the PENDING_APPROVAL status"""
+    try:
+        # Strictly look for the exact status we just set above
+        pending_items = db.query(models.Product).filter(models.Product.status == "PENDING_APPROVAL").all()
+        
+        formatted_items = []
+        for item in pending_items:
+            formatted_items.append({
+                "id": item.id,
+                "supplier_id": getattr(item, 'supplier_id', 1), # Failsafe in case supplier_id column is missing
+                "brand": item.brand,
+                "model_name": item.model_name,
+                "colorway": item.colorway,
+                "price_inr": item.price_inr,
+                "image_url": item.image_url,
+                "total_stock": item.available_stock
+            })
+            
+        return {"pending_products": formatted_items}
+    except Exception as e:
+        print(f"Admin Fetch Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 class ApproveProductRequest(BaseModel):
     delay_minutes: int = 0
@@ -391,3 +433,89 @@ def transition_order_state(order_id: int, req: StateTransitionRequest, db: Sessi
     order.status = req.new_state
     db.commit()
     return {"message": "State Transition Successful", "new_state": order.status}
+
+@app.get("/api/v1/catalog")
+def get_static_catalog(db: Session = Depends(get_db)):
+    """Fetches the full static shoe registry from the 'shoes' table"""
+    try:
+        catalog = db.query(models.StaticShoe).all()
+        return {"catalog": catalog}
+    except Exception as e:
+        print(f"Catalog Fetch Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch catalog")
+
+from datetime import datetime, timezone
+
+@app.get("/api/v1/catalog/{shoe_id}")
+def get_static_shoe_details(shoe_id: str, user_id: int = 1, db: Session = Depends(get_db)):
+    """Fetches static shoe details and formats them exactly like a live reservation for the checkout UI"""
+    shoe = db.query(models.StaticShoe).filter(models.StaticShoe.id == shoe_id).first()
+    if not shoe:
+        raise HTTPException(status_code=404, detail="Shoe not found")
+    
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    # Map static schema to match the dynamic frontend expectations
+    formatted_shoe = {
+        "id": shoe.id,
+        "brand": shoe.manufacturer,
+        "model_name": shoe.name,
+        "colorway": shoe.color,
+        "price_inr": shoe.price,
+        "image_url": "/" + shoe.front_img.replace("\\", "/") if shoe.front_img else ""
+    }
+    
+    return {
+        "shoe": formatted_shoe,
+        "user": {
+            "address": user.address if user else "Address not found",
+            "pincode": user.pincode if user else "---"
+        }
+    }
+
+@app.post("/api/v1/checkout/static/{shoe_id}")
+def checkout_static_shoe(shoe_id: str, payload: dict, db: Session = Depends(get_db)):
+    """Processes checkout for a static shoe without needing a 30-second reservation"""
+    static_shoe = db.query(models.StaticShoe).filter(models.StaticShoe.id == shoe_id).first()
+    if not static_shoe: 
+        raise HTTPException(status_code=404, detail="Shoe not found")
+
+    user_id = payload.get("user_id", 1)
+
+    # 1. JIT Transfer: Ensure the static shoe exists in the dynamic `products` table
+    # so we can link it to the `orders` table for the Admin Dashboard
+    product = db.query(models.Product).filter(models.Product.model_name == static_shoe.name).first()
+    if not product:
+        product = models.Product(
+            brand=static_shoe.manufacturer,
+            model_name=static_shoe.name,
+            colorway=static_shoe.color,
+            price_inr=static_shoe.price,
+            image_url="/" + static_shoe.front_img.replace("\\", "/") if static_shoe.front_img else "",
+            total_stock=999,
+            available_stock=999,
+            status="STATIC"
+        )
+        db.add(product)
+        db.commit()
+        db.refresh(product)
+
+    # 2. Create the Final Order
+    new_order = models.Order(
+        user_id=user_id,
+        shoe_id=product.id,
+        reservation_id=None, # No reservation needed for static!
+        size=payload.get("size"),
+        status="PENDING_VERIFICATION" if payload.get("payment_method") != "cod" else "CONFIRMED",
+        created_at=datetime.now(timezone.utc)
+    )
+    
+    # Save UTR if the model supports it
+    if hasattr(new_order, 'utr') and payload.get("utr_number"):
+        new_order.utr = payload.get("utr_number")
+        
+    db.add(new_order)
+    db.commit()
+    db.refresh(new_order)
+    
+    return {"message": "Success", "order_id": new_order.id}

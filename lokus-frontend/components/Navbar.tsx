@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Search, PlusCircle, ShoppingBag, LayoutGrid, LogOut, ShieldAlert } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -9,8 +10,11 @@ export default function Navbar() {
   const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  // New Search State
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Check the cookies for the user's token and role whenever they navigate
   useEffect(() => {
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
@@ -19,7 +23,6 @@ export default function Navbar() {
       return null;
     };
     
-    // Check if the user is actually logged in
     const token = getCookie('token');
     if (token) {
       setIsAuthenticated(true);
@@ -30,108 +33,95 @@ export default function Navbar() {
     }
   }, [pathname]);
 
-  // Hide the Navbar entirely on the authentication pages
-  if (pathname === '/login' || pathname === '/register' || pathname === '/verify') {
-    return null;
-  }
+  if (pathname === '/login' || pathname === '/register' || pathname === '/verify') return null;
 
   const handleLogout = () => {
-    // Delete BOTH the auth token and the role cookies
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
     document.cookie = 'role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
-    
     setIsAuthenticated(false);
     setUserRole('guest');
-    
-    // Redirect back to the login page
     router.push('/login');
     router.refresh();
   };
 
-  // Prevent hydration flash by rendering an empty nav until auth state is known
-  if (userRole === null) {
-    return <nav className="bg-neutral-100 border-b border-stone-300 sticky top-0 z-50 h-20"></nav>;
-  }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Pass the search term to the collection page via URL parameters
+      router.push(`/collection?q=${encodeURIComponent(searchQuery)}`);
+      setShowSearch(false);
+      setSearchQuery('');
+    }
+  };
+
+  if (userRole === null) return <header className="sticky top-0 z-50 bg-white border-b border-gray-100 h-[73px]"></header>;
 
   return (
-    <nav className="bg-neutral-100 border-b border-stone-300 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="flex justify-between items-center h-20">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between">
           
-          {/* Brand Logo - Routes dynamically based on role */}
-          <Link href={userRole === 'supplier' ? '/vendor' : '/'} className="text-3xl font-extrabold tracking-tighter text-stone-900 hover:text-red-800 transition-colors">
-            LOKUS.
+          <Link href={userRole === 'admin' ? '/admin' : '/'} className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center overflow-hidden">
+               <span className="text-white font-bold text-xl">L</span>
+            </div>
+            <h1 className="text-2xl font-bold text-black tracking-tighter">LOKUS</h1>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex space-x-8 items-center">
+          <nav className="hidden md:flex items-center gap-8">
+            <Link href="/" className={`${pathname === '/' ? 'text-black' : 'text-gray-500'} hover:text-black transition-colors font-medium`}>Shop</Link>
+            <Link href="/collection" className={`flex items-center gap-1 px-4 py-2 rounded-full font-medium transition-all ${pathname === '/collection' ? 'bg-black text-white' : 'text-gray-700 hover:bg-gray-100'}`}>
+              <LayoutGrid className="w-4 h-4" /> Explore Collection
+            </Link>
             
-            {/* Show to Guests and Customers */}
-            {userRole !== 'supplier' && (
-              <Link 
-                href="/" 
-                className={`text-sm font-bold uppercase tracking-widest transition-colors ${pathname === '/' ? 'text-stone-900' : 'text-stone-400 hover:text-stone-900'}`}
-              >
-                Drops
-              </Link>
-            )}
-            
-            {/* Show ONLY to Suppliers */}
+            {/* STRICTLY LOCKED: Only Suppliers see Add Shoe */}
             {userRole === 'supplier' && (
-              <Link 
-                href="/vendor" 
-                className={`text-sm font-bold uppercase tracking-widest transition-colors ${pathname === '/vendor' ? 'text-stone-900' : 'text-stone-400 hover:text-stone-900'}`}
-              >
-                Command Center
+              <Link href="/vendor" className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium bg-blue-50 px-3 py-1.5 rounded-full transition-colors">
+                <PlusCircle className="w-4 h-4" /> Add Shoe
               </Link>
             )}
-          </div>
 
-          {/* Right Side: Auth / Vault / Logout */}
-          <div className="flex items-center space-x-3 md:space-x-4">
+            {/* STRICTLY LOCKED: Only Admins see Command Center */}
+            {userRole === 'admin' && (
+              <Link href="/admin" className="flex items-center gap-1 text-red-600 hover:text-red-700 font-medium bg-red-50 px-3 py-1.5 rounded-full transition-colors">
+                <ShieldAlert className="w-4 h-4" /> Command Center
+              </Link>
+            )}
+          </nav>
+
+          <div className="flex items-center gap-3 sm:gap-5">
+            {/* Functional Interactive Search */}
+            <form onSubmit={handleSearch} className="relative flex items-center">
+              {showSearch && (
+                <input 
+                  type="text" autoFocus placeholder="Search shoes..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                  className="absolute right-8 w-48 sm:w-64 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm outline-none focus:border-black transition-all font-medium text-black"
+                />
+              )}
+              <button type="button" onClick={() => setShowSearch(!showSearch)} className="text-gray-600 hover:text-black transition-colors p-2 bg-white rounded-full z-10">
+                <Search className="w-5 h-5" />
+              </button>
+            </form>
             
             {!isAuthenticated ? (
-              /* --- UNAUTHENTICATED GUEST CONTROLS --- */
-              <>
-                <Link 
-                  href="/login" 
-                  className="text-stone-500 hover:text-stone-900 text-xs md:text-sm font-bold uppercase tracking-widest px-2 md:px-4 py-2.5 transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/register" 
-                  className="bg-stone-900 text-neutral-100 text-xs md:text-sm font-bold uppercase tracking-widest px-4 md:px-6 py-2.5 rounded-xl hover:bg-red-800 transition-colors"
-                >
-                  Register
-                </Link>
-              </>
+              <div className="flex items-center gap-3">
+                <Link href="/login" className="text-sm font-bold text-gray-600 hover:text-black transition-colors">Sign In</Link>
+                <Link href="/register" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:bg-gray-800 transition-colors shadow-md">Register</Link>
+              </div>
             ) : (
-              /* --- LOGGED IN USER CONTROLS --- */
-              <>
-                {/* Hide Vault from Suppliers */}
-                {userRole !== 'supplier' && (
-                  <Link 
-                    href="/vault" 
-                    className="bg-stone-900 text-neutral-100 text-xs md:text-sm font-bold uppercase tracking-widest px-4 md:px-6 py-2.5 rounded-xl hover:bg-red-800 transition-colors"
-                  >
-                    Vault
-                  </Link>
+              <div className="flex items-center gap-4">
+                {userRole !== 'supplier' && userRole !== 'admin' && (
+                  <Link href="/vault" className="text-gray-600 hover:text-black transition-colors" title="Your Orders"><ShoppingBag className="w-5 h-5" /></Link>
                 )}
-                
-                {/* Logout Button */}
-                <button 
-                  onClick={handleLogout}
-                  className="border-2 border-stone-300 text-stone-500 hover:text-red-800 hover:border-red-800 text-xs md:text-sm font-bold uppercase tracking-widest px-4 md:px-6 py-2 rounded-xl transition-colors bg-white"
-                >
-                  Logout
+                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600 transition-colors bg-gray-50 p-2 rounded-full hover:bg-red-50" title="Logout">
+                  <LogOut className="w-5 h-5" />
                 </button>
-              </>
+              </div>
             )}
           </div>
           
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
