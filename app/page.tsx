@@ -1,12 +1,13 @@
 import { supabase } from '@/app/lib/supabase';
 import Link from 'next/link';
-import Image from 'next/image';
 
-// Fetch products from Supabase (only first 3 for homepage)
+// Force dynamic to always show latest products
+export const dynamic = 'force-dynamic';
+
 async function getFeaturedProducts() {
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, price, image_url, slug')
+    .select('id, name, price, image_url')
     .limit(3);
   
   if (error || !data) return [];
@@ -19,18 +20,17 @@ export default async function Home() {
   return (
     <main className="bg-white">
       
-      {/* HERO SECTION - Full screen with overlay */}
+      {/* HERO SECTION */}
       <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
-        {/* Background image - replace with your own hero image URL */}
         <div 
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format)',
+            backgroundImage: 'url(https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcSdNYmkT-qbW_pd_NGgyBkqyKmbqow3pd_oAx_If3Za9gDKabUf1FxB1QUWcZXvy76ndbVMBzUVP5lBU3lXWNSA5_M6dUylUaSoBr2cBeWtrrYO-yPjoWlP)',  // <-- REPLACE THIS
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         >
-          <div className="absolute inset-0 bg-black/30" /> {/* Dark overlay for text contrast */}
+          <div className="absolute inset-0 bg-black/30" />
         </div>
         
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
@@ -49,7 +49,6 @@ export default async function Home() {
           </Link>
         </div>
         
-        {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
             <div className="w-1 h-2 bg-white rounded-full mt-2"></div>
@@ -57,7 +56,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* FEATURED PRODUCTS - Clean grid with hover zoom */}
+      {/* FEATURED PRODUCTS - Now dynamic from Supabase */}
       <section className="py-24 px-4 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">Curated Selection</p>
@@ -89,16 +88,7 @@ export default async function Home() {
               </div>
             </Link>
           )) : (
-            // Placeholder if no products in DB
-            [1,2,3].map((i) => (
-              <div key={i} className="bg-gray-50 rounded-2xl p-6 text-center">
-                <div className="aspect-square bg-gray-200 rounded-xl flex items-center justify-center text-4xl mb-4">
-                  👟
-                </div>
-                <h3 className="font-semibold">Premium Sneaker {i}</h3>
-                <p className="text-gray-500">$129</p>
-              </div>
-            ))
+            <p className="text-center col-span-3">No products yet. Add some in Supabase!</p>
           )}
         </div>
 
@@ -110,7 +100,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* BRAND STORY - Asymmetric layout */}
+      {/* BRAND STORY - replace image URL */}
       <section className="bg-gray-50 py-24 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -134,9 +124,8 @@ export default async function Home() {
             </div>
             <div className="order-1 md:order-2">
               <div className="bg-gray-200 rounded-2xl aspect-square flex items-center justify-center text-8xl overflow-hidden">
-                {/* Replace with a real brand image */}
                 <img 
-                  src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=2025&auto=format" 
+                  src="https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTYgwY1JVE0lACXG-Ad2vHpvnJlz4BfZZm4tPT6ul8RZYjiu89CD5n8CFZJa-uxjRbr1F6DpBTYfFF4uNveb0qfoPGNSjqjZBcm3NlsZHQBkUugbQNCjf0F7YU"   // <-- REPLACE THIS
                   alt="LOKUS craftsmanship"
                   className="w-full h-full object-cover"
                 />
@@ -145,6 +134,10 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* NEWSLETTER + FOOTER sections unchanged... keep them from the previous code */}
+      {/* (copy the newsletter and footer from the previous premium homepage) */}
+      
 
       {/* NEWSLETTER + COMMUNITY */}
       <section className="py-24 px-4 text-center max-w-3xl mx-auto">
