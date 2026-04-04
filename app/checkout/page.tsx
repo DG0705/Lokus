@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from '@/app/context/CartContext';
+import { useAuth } from '@/app/context/AuthContext';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -12,11 +13,13 @@ declare global {
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handlePayment = async () => {
     setLoading(true);
     try {
+      // 1. Create Razorpay order
       const response = await fetch('/api/create-razorpay-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -25,6 +28,7 @@ export default function CheckoutPage() {
       const orderData = await response.json();
       if (!orderData.id) throw new Error('Failed to create order');
 
+      // 2. Configure Razorpay checkout
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
@@ -32,15 +36,47 @@ export default function CheckoutPage() {
         name: 'LOKUS',
         description: `Payment for order ${orderData.id}`,
         order_id: orderData.id,
-        handler: async function (response: any) {
-          console.log('Payment Success:', response);
+        handler: async function (razorpayResponse: any) {
+          // 3. Save order to Supabase after successful payment
+          try {
+            const saveResponse = await fetch('/api/save-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                orderData: {
+                  payment_id: razorpayResponse.razorpay_payment_id,
+                  order_id: razorpayResponse.razorpay_order_id,
+                  amount: orderData.amount,
+                },
+                items: items,
+                userId: user?.id || null,
+              }),
+            });
+            if (!saveResponse.ok) {
+              console.error('Failed to save order');
+            }
+          } catch (err) {
+            console.error('Error saving order:', err);
+          }
+
+          // 4. Clear cart and redirect to success page
           clearCart();
-          window.location.href = `/success?payment_id=${response.razorpay_payment_id}&order_id=${response.razorpay_order_id}`;
+          window.location.href = `/success?payment_id=${razorpayResponse.razorpay_payment_id}&order_id=${razorpayResponse.razorpay_order_id}`;
         },
-        prefill: { name: 'LOKUS Customer', email: 'customer@lokus.com' },
-        theme: { color: '#000000' },
-        modal: { ondismiss: () => setLoading(false) }
+        prefill: {
+          name: user?.email ? user.email.split('@')[0] : 'LOKUS Customer',
+          email: user?.email || 'customer@lokus.com',
+        },
+        theme: {
+          color: '#000000',
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+          },
+        },
       };
+
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useCart } from '@/app/context/CartContext';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -11,9 +11,12 @@ function SuccessContent() {
   const searchParams = useSearchParams();
   const paymentId = searchParams.get('payment_id');
   const orderId = searchParams.get('order_id');
+  const hasCleared = useRef(false); // Prevents multiple clears
 
   useEffect(() => {
-    if (paymentId && orderId) {
+    // Clear cart only once
+    if (!hasCleared.current && paymentId && orderId) {
+      hasCleared.current = true;
       clearCart();
     }
   }, [paymentId, orderId, clearCart]);
