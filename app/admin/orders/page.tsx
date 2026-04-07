@@ -6,19 +6,21 @@ import { createClient } from '@/utils/supabase/client';
 export default function AdminOrders() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     async function fetchOrders() {
       const supabase = createClient();
-      const { data } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
+      if (filter !== 'all') {
+        query = query.eq('status', filter);
+      }
+      const { data } = await query;
       setOrders(data || []);
       setLoading(false);
     }
     fetchOrders();
-  }, []);
+  }, [filter]);
 
   const updateStatus = async (id: number, newStatus: string) => {
     const supabase = createClient();
@@ -30,11 +32,25 @@ export default function AdminOrders() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Orders</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Orders</h1>
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="border rounded-lg px-4 py-2"
+        >
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="shipped">Shipped</option>
+          <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
       <div className="space-y-4">
         {orders.map((order) => (
           <div key={order.id} className="bg-white rounded-2xl p-6 shadow-sm border">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start flex-wrap gap-4">
               <div>
                 <p className="font-semibold">Order #{order.order_number}</p>
                 <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleString()}</p>
@@ -67,6 +83,7 @@ export default function AdminOrders() {
             </details>
           </div>
         ))}
+        {orders.length === 0 && <p className="text-gray-500 text-center py-8">No orders found.</p>}
       </div>
     </div>
   );
