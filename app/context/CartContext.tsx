@@ -1,18 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-export type CartItem = {
-  id: string;           // unique cart item ID
-  productId: number;    // Supabase product ID
-  name: string;
-  price: number;
-  size: number;
-  color: string;
-  image_url: string;
-  quantity: number;
-};
+import type { CartItem } from '@/app/lib/types';
 
 type CartContextType = {
   items: CartItem[];
@@ -26,47 +17,48 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function readStoredCart() {
+  if (typeof window === 'undefined') return [];
+
+  const stored = window.localStorage.getItem('lokus_cart');
+  if (!stored) return [];
+
+  try {
+    return JSON.parse(stored) as CartItem[];
+  } catch (error) {
+    console.error('Failed to parse cart', error);
+    return [];
+  }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(readStoredCart);
 
-  // Load cart from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem('lokus_cart');
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse cart', e);
-      }
-    }
-  }, []);
-
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('lokus_cart', JSON.stringify(items));
+    window.localStorage.setItem('lokus_cart', JSON.stringify(items));
   }, [items]);
 
   const addItem = (newItem: Omit<CartItem, 'id'>) => {
-    setItems(prev => {
-      // Check if same product, size, color already exists
+    setItems((prev) => {
       const existingIndex = prev.findIndex(
-        item => item.productId === newItem.productId && 
-                item.size === newItem.size && 
-                item.color === newItem.color
+        (item) =>
+          item.productId === newItem.productId &&
+          item.size === newItem.size &&
+          item.color === newItem.color
       );
+
       if (existingIndex > -1) {
-        // Update quantity
         const updated = [...prev];
         updated[existingIndex].quantity += newItem.quantity;
         return updated;
       }
-      // Add new item with unique ID
+
       return [...prev, { ...newItem, id: uuidv4() }];
     });
   };
 
   const removeItem = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -74,18 +66,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(id);
       return;
     }
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity } : item
-    ));
+
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, quantity } : item)));
   };
 
   const clearCart = () => setItems([]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice }}>
+    <CartContext.Provider
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice }}
+    >
       {children}
     </CartContext.Provider>
   );

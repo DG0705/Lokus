@@ -2,48 +2,53 @@
 
 import { useState } from 'react';
 
-
 export default function NewsletterForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!email) return;
 
     setStatus('loading');
-    
-    // Simulate API call – replace with your actual newsletter service
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       console.log('Newsletter signup:', email);
       setStatus('success');
       setEmail('');
-      setTimeout(() => setStatus('idle'), 3000);
-    } catch (error) {
+      window.setTimeout(() => setStatus('idle'), 3000);
+    } catch {
       setStatus('error');
-      setTimeout(() => setStatus('idle'), 3000);
+      window.setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Your email address"
-        className="flex-1 px-5 py-3 border border-gray-300 rounded-full focus:outline-none focus:border-black"
-        required
-        disabled={status === 'loading'}
-      />
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-gray-800 transition disabled:opacity-50"
-      >
-        {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
-      </button>
-    </form>
+    <div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+        <input
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Enter your email"
+          className="min-w-0 flex-1 rounded-full border border-[var(--color-border)] bg-white/80 px-5 py-3 text-sm outline-none transition focus:border-[var(--color-ember)]"
+          required
+          disabled={status === 'loading'}
+        />
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className="rounded-full bg-[var(--color-foreground)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.22em] text-white transition hover:bg-[var(--color-graphite)] disabled:opacity-50"
+        >
+          {status === 'loading' ? 'Joining...' : 'Join list'}
+        </button>
+      </form>
+      {status === 'success' ? (
+        <p className="mt-3 text-xs uppercase tracking-[0.2em] text-[var(--color-ember)]">
+          You are on the list.
+        </p>
+      ) : null}
+    </div>
   );
 }

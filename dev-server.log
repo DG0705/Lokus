@@ -1,0 +1,27 @@
+
+> lokus@0.1.0 dev
+> next dev --port 3001
+
+▲ Next.js 16.2.2 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.56.1:3001
+- Environments: .env.local
+✓ Ready in 1097ms
+
+○ Compiling / ...
+ GET / 200 in 24.9s (next.js: 19.5s, proxy.ts: 2.5s, application-code: 2.9s)
+ GET /shop 200 in 3.2s (next.js: 1857ms, proxy.ts: 660ms, application-code: 706ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /men 200 in 2.5s (next.js: 1638ms, proxy.ts: 375ms, application-code: 449ms)
+ GET /new-arrivals 200 in 2.3s (next.js: 1541ms, proxy.ts: 257ms, application-code: 524ms)
+ GET /brands 200 in 1559ms (next.js: 1211ms, proxy.ts: 241ms, application-code: 107ms)
+ GET /account 200 in 2.1s (next.js: 1277ms, proxy.ts: 701ms, application-code: 100ms)
+ GET /size-guide 200 in 2.2s (next.js: 1771ms, proxy.ts: 330ms, application-code: 88ms)
+ GET /admin/dashboard 200 in 2.8s (next.js: 1636ms, proxy.ts: 829ms, application-code: 316ms)
+ GET /admin/products 200 in 2.3s (next.js: 1045ms, proxy.ts: 1200ms, application-code: 79ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /admin/products/new 200 in 2.2s (next.js: 1200ms, proxy.ts: 878ms, application-code: 100ms)
+ GET /admin/products 200 in 1591ms (next.js: 15ms, proxy.ts: 1516ms, application-code: 60ms)
+ GET / 200 in 1306ms (next.js: 16ms, proxy.ts: 535ms, application-code: 755ms)
+ GET /shop 200 in 954ms (next.js: 16ms, proxy.ts: 382ms, application-code: 556ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior

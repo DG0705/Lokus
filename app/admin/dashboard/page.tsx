@@ -1,10 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
+import { formatPrice } from '@/app/lib/format';
 import { createClient } from '@/utils/supabase/client';
 
+type DashboardStats = {
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  pendingOrders: number;
+};
+
+type OrderSummary = {
+  total_amount: number | null;
+  status: string | null;
+};
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
@@ -13,48 +27,62 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
+    let active = true;
+
+    const fetchStats = async () => {
       const supabase = createClient();
-      const [{ count: productCount }, { data: orders, error }] = await Promise.all([
+      const [{ count: productCount }, { data: orders }] = await Promise.all([
         supabase.from('products').select('*', { count: 'exact', head: true }),
-        supabase.from('orders').select('*'),
+        supabase.from('orders').select('total_amount, status'),
       ]);
-      const totalRevenue = orders?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0;
-      const pending = orders?.filter(o => o.status === 'pending').length || 0;
+
+      if (!active) return;
+
+      const typedOrders = (orders as OrderSummary[] | null) ?? [];
+      const totalRevenue = typedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
+      const pendingOrders = typedOrders.filter((order) => order.status === 'pending').length;
+
       setStats({
         totalProducts: productCount || 0,
-        totalOrders: orders?.length || 0,
+        totalOrders: typedOrders.length,
         totalRevenue: totalRevenue / 100,
-        pendingOrders: pending,
+        pendingOrders,
       });
       setLoading(false);
-    }
-    fetchStats();
+    };
+
+    void fetchStats();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (loading) return <div>Loading stats...</div>;
+  if (loading) {
+    return <div className="rounded-[2rem] border border-stone-200 bg-white p-8 text-stone-500">Loading dashboard...</div>;
+  }
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Products" value={stats.totalProducts} icon="👟" />
-        <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" />
-        <StatCard title="Total Revenue" value={`₹${stats.totalRevenue.toFixed(2)}`} icon="💰" />
-        <StatCard title="Pending Orders" value={stats.pendingOrders} icon="⏳" />
+      <div className="mb-8">
+        <p className="text-xs uppercase tracking-[0.24em] text-stone-500">Store overview</p>
+        <h1 className="mt-2 font-display text-6xl">Dashboard</h1>
+      </div>
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Total products" value={String(stats.totalProducts)} />
+        <StatCard title="Total orders" value={String(stats.totalOrders)} />
+        <StatCard title="Revenue" value={formatPrice(stats.totalRevenue)} />
+        <StatCard title="Pending orders" value={String(stats.pendingOrders)} />
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: string | number; icon: string }) {
+function StatCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-2xl">{icon}</span>
-        <span className="text-2xl font-bold">{value}</span>
-      </div>
-      <p className="text-gray-500 text-sm">{title}</p>
+    <div className="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
+      <p className="text-xs uppercase tracking-[0.24em] text-stone-500">{title}</p>
+      <p className="mt-5 font-display text-5xl">{value}</p>
     </div>
   );
 }

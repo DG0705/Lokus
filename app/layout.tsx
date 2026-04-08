@@ -1,16 +1,20 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Script from "next/script";
-import { CartProvider } from "./context/CartContext";
-import { AuthProvider } from "./context/AuthContext";
-import Navbar from "./components/Navbar";
+import type { Metadata } from 'next';
+import localFont from 'next/font/local';
+import Script from 'next/script';
 
-const inter = Inter({ subsets: ["latin"] });
+import './globals.css';
+
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+
+const bodyFont = localFont({
+  src: '../node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf',
+  variable: '--font-body',
+});
 
 export const metadata: Metadata = {
-  title: "LOKUS - Premium Footwear",
-  description: "Where every step finds its place",
+  title: 'LOKUS | Premium Multi-Brand Shoe Store',
+  description: "A premium India-first destination for curated footwear from the world's leading brands.",
 };
 
 export default function RootLayout({
@@ -21,17 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </head>
-      <body className={inter.className}>
+      <body className={bodyFont.variable}>
         <AuthProvider>
-          <CartProvider>
-            <Navbar />
-            {children}
-          </CartProvider>
+          <CartProvider>{children}</CartProvider>
         </AuthProvider>
       </body>
     </html>
