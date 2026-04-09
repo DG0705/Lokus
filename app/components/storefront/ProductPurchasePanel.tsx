@@ -40,7 +40,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
   };
 
   return (
-    <div className="premium-card p-6 md:p-8">
+    <div className="lokus-panel bg-white p-6 md:p-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">
@@ -57,7 +57,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
         {product.badge ? <span>{product.badge}</span> : null}
       </div>
 
-      <p className="mt-6 text-sm leading-7 text-[var(--color-muted-foreground)]">
+      <p className="mt-6 max-w-xl text-sm leading-7 text-[var(--color-muted-foreground)]">
         {product.description || 'A premium pair selected for comfort, identity, and daily rotation appeal.'}
       </p>
 
@@ -121,7 +121,7 @@ export function ProductPurchasePanel({ product }: ProductPurchasePanelProps) {
         </Link>
       </div>
 
-      <div className="mt-8 grid gap-3 rounded-[1.5rem] bg-white/70 p-5 text-sm text-[var(--color-muted-foreground)]">
+      <div className="mt-8 grid gap-3 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-mist)]/55 p-5 text-sm text-[var(--color-muted-foreground)]">
         <p>Free premium delivery on prepaid orders above Rs. 5,000.</p>
         <p>Easy returns within 7 days for unworn pairs.</p>
         <p>Secure checkout powered by Razorpay.</p>

@@ -9,8 +9,9 @@ export async function proxy(request: NextRequest) {
 
   const isAccountRoute = pathname.startsWith('/account');
   const isAdminRoute = pathname.startsWith('/admin');
+  const isDeliveryRoute = pathname.startsWith('/delivery');
 
-  if (!isAccountRoute && !isAdminRoute) {
+  if (!isAccountRoute && !isAdminRoute && !isDeliveryRoute) {
     return response;
   }
 

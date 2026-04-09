@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f1e8;
+  --background: #f4ede2;
   --foreground: #111111;
-  --muted-foreground: #6f675f;
-  --sand: #d8c7ac;
-  --ember: #b96a3c;
-  --mist: #efe7dc;
+  --muted-foreground: #4f4842;
+  --sand: #dcc6a3;
+  --ember: #b86a39;
+  --mist: #ede3d6;
   --graphite: #23201d;
-  --border: rgba(17, 17, 17, 0.12);
-  --shadow: 0 24px 60px rgba(17, 17, 17, 0.08);
+  --border: rgba(17, 17, 17, 0.14);
+  --shadow: 0 24px 60px rgba(17, 17, 17, 0.1);
   --font-display: Georgia, 'Times New Roman', serif;
 }
 
@@ -61,7 +61,7 @@ a {
 }
 
 .premium-card {
-  background: color-mix(in srgb, white 72%, transparent);
+  background: color-mix(in srgb, white 86%, transparent);
   border: 1px solid var(--border);
   border-radius: 1.75rem;
   box-shadow: var(--shadow);
@@ -98,6 +98,45 @@ a {
   max-width: 80rem;
   margin-inline: auto;
   padding-inline: 1.25rem;
+}
+
+.lokus-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2.2rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.lokus-panel::after {
+  content: '';
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid color-mix(in srgb, var(--ember) 18%, transparent);
+  border-radius: 1.5rem;
+  pointer-events: none;
+}
+
+.lokus-rail {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+}
+
+.lokus-line {
+  position: relative;
+}
+
+.lokus-line::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--ember), transparent);
 }
 
 @media (min-width: 1024px) {

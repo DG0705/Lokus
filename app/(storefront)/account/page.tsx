@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { formatPrice } from '@/app/lib/format';
@@ -84,7 +85,15 @@ export default function AccountPage() {
                       {new Date(order.created_at).toLocaleDateString('en-IN')}
                     </p>
                   </div>
-                  <p className="text-lg font-semibold">{formatPrice(order.total_amount / 100)}</p>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold">{formatPrice(order.total_amount / 100)}</p>
+                    <Link
+                      href={`/account/orders/${order.id}/track`}
+                      className="mt-3 inline-block text-xs uppercase tracking-[0.22em] text-[var(--color-ember)] underline-offset-4 hover:underline"
+                    >
+                      Track delivery
+                    </Link>
+                  </div>
                 </div>
                 <div className="mt-5 grid gap-3">
                   {order.order_items?.map((item, index) => (

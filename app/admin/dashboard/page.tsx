@@ -9,7 +9,7 @@ type DashboardStats = {
   totalProducts: number;
   totalOrders: number;
   totalRevenue: number;
-  pendingOrders: number;
+  activeDeliveries: number;
 };
 
 type OrderSummary = {
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
-    pendingOrders: 0,
+    activeDeliveries: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -40,13 +40,15 @@ export default function AdminDashboard() {
 
       const typedOrders = (orders as OrderSummary[] | null) ?? [];
       const totalRevenue = typedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
-      const pendingOrders = typedOrders.filter((order) => order.status === 'pending').length;
+      const activeDeliveries = typedOrders.filter((order) =>
+        ['ready_to_dispatch', 'assigned', 'accepted', 'picked_up', 'out_for_delivery'].includes(order.status || '')
+      ).length;
 
       setStats({
         totalProducts: productCount || 0,
         totalOrders: typedOrders.length,
         totalRevenue: totalRevenue / 100,
-        pendingOrders,
+        activeDeliveries,
       });
       setLoading(false);
     };
@@ -72,7 +74,7 @@ export default function AdminDashboard() {
         <StatCard title="Total products" value={String(stats.totalProducts)} />
         <StatCard title="Total orders" value={String(stats.totalOrders)} />
         <StatCard title="Revenue" value={formatPrice(stats.totalRevenue)} />
-        <StatCard title="Pending orders" value={String(stats.pendingOrders)} />
+        <StatCard title="Active deliveries" value={String(stats.activeDeliveries)} />
       </div>
     </div>
   );

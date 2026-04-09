@@ -30,18 +30,17 @@ export const defaultProductImage =
   'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1400&q=80';
 
 export const navLinks = [
-  { href: '/shop', label: 'Shop' },
   { href: '/men', label: 'Men' },
   { href: '/women', label: 'Women' },
-  { href: '/new-arrivals', label: 'New Arrivals' },
+  { href: '/new-arrivals', label: 'Drop Clock' },
   { href: '/brands', label: 'Brands' },
 ] as const;
 
 export const footerShopLinks = [
-  { href: '/shop', label: 'All Shoes' },
   { href: '/men', label: 'Men' },
   { href: '/women', label: 'Women' },
-  { href: '/new-arrivals', label: 'New Arrivals' },
+  { href: '/new-arrivals', label: 'Drop Clock' },
+  { href: '/brands', label: 'Brand Edit' },
 ] as const;
 
 export const footerSupportLinks = [

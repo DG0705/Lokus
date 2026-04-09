@@ -26,36 +26,39 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <main className="pb-20 pt-10">
       <section className="section-wrap">
         <div className="mb-8 flex items-center gap-3 text-xs uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">
-          <Link href="/shop">Shop</Link>
+          <Link href="/shop">Gallery</Link>
           <span>/</span>
           <span>{product.brand || 'Curated label'}</span>
         </div>
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
-          <Reveal>
+        <div className="grid gap-8 lg:grid-cols-[4rem_minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
+          <div className="hidden lg:flex lg:justify-center">
+            <span className="lokus-rail text-[10px] text-[var(--color-muted-foreground)]">Product Signal</span>
+          </div>
+          <Reveal className="self-start">
             <ProductGallery images={productGallery(product)} alt={product.name} />
           </Reveal>
-          <Reveal delay={0.08}>
+          <Reveal delay={0.08} className="lg:sticky lg:top-24 lg:self-start">
             <ProductPurchasePanel product={product} />
           </Reveal>
         </div>
       </section>
 
       <section className="section-wrap mt-16 grid gap-6 lg:grid-cols-3">
-        <Reveal className="premium-card p-6">
+        <Reveal className="lokus-panel bg-white p-6">
           <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Craft notes</p>
           <h2 className="mt-4 font-display text-4xl">Premium materials, easy rotation</h2>
           <p className="mt-4 text-sm leading-7 text-[var(--color-muted-foreground)]">
             Every featured pair is selected for comfort, silhouette quality, and its ability to elevate the everyday wardrobe.
           </p>
         </Reveal>
-        <Reveal delay={0.05} className="premium-card p-6">
+        <Reveal delay={0.05} className="lokus-panel bg-white p-6">
           <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Delivery</p>
           <h2 className="mt-4 font-display text-4xl">Fast dispatch across India</h2>
           <p className="mt-4 text-sm leading-7 text-[var(--color-muted-foreground)]">
             Secure prepaid checkout, premium packaging, and status updates once your order is confirmed.
           </p>
         </Reveal>
-        <Reveal delay={0.1} className="premium-card p-6">
+        <Reveal delay={0.1} className="lokus-panel bg-white p-6">
           <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Returns</p>
           <h2 className="mt-4 font-display text-4xl">Simple exchange support</h2>
           <p className="mt-4 text-sm leading-7 text-[var(--color-muted-foreground)]">

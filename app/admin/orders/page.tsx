@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { formatPrice } from '@/app/lib/format';
@@ -35,12 +36,6 @@ export default function AdminOrders() {
     };
   }, [filter]);
 
-  const updateStatus = async (id: number, newStatus: string) => {
-    const supabase = createClient();
-    await supabase.from('orders').update({ status: newStatus }).eq('id', id);
-    setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, status: newStatus } : order)));
-  };
-
   if (loading) {
     return <div className="rounded-[2rem] border border-stone-200 bg-white p-8 text-stone-500">Loading orders...</div>;
   }
@@ -52,18 +47,31 @@ export default function AdminOrders() {
           <p className="text-xs uppercase tracking-[0.24em] text-stone-500">Operations</p>
           <h1 className="mt-2 font-display text-6xl">Orders</h1>
         </div>
-        <select
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          className="rounded-full border border-stone-200 bg-white px-4 py-3 text-sm outline-none"
-        >
-          <option value="all">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="paid">Paid</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        <div className="flex flex-col items-stretch gap-3 md:flex-row">
+          <select
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+            className="rounded-full border border-stone-200 bg-white px-4 py-3 text-sm outline-none"
+          >
+            <option value="all">All statuses</option>
+            <option value="pending">Pending</option>
+            <option value="ready_to_dispatch">Ready to dispatch</option>
+            <option value="assigned">Assigned</option>
+            <option value="accepted">Accepted</option>
+            <option value="picked_up">Picked up</option>
+            <option value="out_for_delivery">Out for delivery</option>
+            <option value="delivered">Delivered</option>
+            <option value="failed_delivery">Failed delivery</option>
+            <option value="returned">Returned</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <Link
+            href="/admin/delivery"
+            className="rounded-full bg-stone-950 px-5 py-3 text-center text-xs uppercase tracking-[0.18em] text-white"
+          >
+            Open delivery board
+          </Link>
+        </div>
       </div>
       <div className="space-y-4">
         {orders.map((order) => (
@@ -78,17 +86,9 @@ export default function AdminOrders() {
                 <p className="mt-3 text-sm">Total: {formatPrice(order.total_amount / 100)}</p>
                 <p className="mt-1 text-sm text-stone-500">Payment ID: {order.payment_id || 'Unavailable'}</p>
               </div>
-              <select
-                value={order.status}
-                onChange={(event) => updateStatus(order.id, event.target.value)}
-                className="rounded-full border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none"
-              >
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+              <div className="rounded-full border border-stone-200 bg-stone-50 px-4 py-3 text-sm capitalize text-stone-700">
+                {order.status.replaceAll('_', ' ')}
+              </div>
             </div>
             <div className="mt-5 space-y-3">
               {order.order_items?.map((item, index) => (

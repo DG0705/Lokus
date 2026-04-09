@@ -2,166 +2,219 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import NewsletterForm from '@/app/components/NewsletterForm';
+import { DropCountdown } from '@/app/components/storefront/DropCountdown';
 import { ProductCard } from '@/app/components/storefront/ProductCard';
 import { Reveal } from '@/app/components/storefront/Reveal';
 import { collectionHighlights, featuredBrandNames } from '@/app/lib/constants';
+import { upcomingDrops } from '@/app/lib/drops';
 import { getFeaturedProducts, getProducts } from '@/app/lib/catalog';
 
 export default async function HomePage() {
-  const [featuredProducts, newArrivals] = await Promise.all([
+  const [featuredProducts, newPairs] = await Promise.all([
     getFeaturedProducts(4),
-    getProducts({ sort: 'newest' }).then((items) => items.slice(0, 4)),
+    getProducts({ sort: 'newest' }).then((items) => items.slice(0, 3)),
   ]);
+
+  const leadDrop = upcomingDrops[0];
 
   return (
     <main className="pb-24">
       <section className="section-wrap pt-6">
-        <div className="premium-card relative overflow-hidden px-6 py-10 md:px-10 md:py-14">
-          <div className="absolute inset-0 bg-[linear-gradient(118deg,rgba(17,17,17,0.95),rgba(35,32,29,0.82),rgba(185,106,60,0.18))]" />
-          <div className="absolute inset-y-0 right-0 hidden w-1/2 md:block">
-            <Image
-              src="https://images.unsplash.com/photo-1543508282-6319a3e2621f?auto=format&fit=crop&w=1400&q=80"
-              alt="Premium sneaker editorial"
-              fill
-              priority
-              className="object-cover opacity-70"
-              sizes="50vw"
-            />
-          </div>
-          <div className="relative z-10 grid gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(18rem,24rem)] md:items-end">
-            <Reveal className="max-w-3xl">
-              <p className="text-[11px] uppercase tracking-[0.34em] text-[var(--color-sand)]">Premium multi-brand shoe house</p>
-              <h1 className="mt-6 font-display text-6xl leading-[0.92] text-white md:text-[6.4rem]">
-                Curated footwear for every part of your story.
+        <div className="lokus-panel bg-[linear-gradient(135deg,rgba(17,17,17,0.98),rgba(35,32,29,0.92),rgba(184,106,57,0.16))] px-6 py-8 text-white md:px-10 md:py-10">
+          <div className="grid gap-8 lg:grid-cols-[4.2rem_minmax(0,1.05fr)_minmax(20rem,28rem)]">
+            <div className="hidden lg:flex lg:justify-center">
+              <span className="lokus-rail text-[10px] text-white/34">Lokus Edition 01</span>
+            </div>
+
+            <Reveal className="relative">
+              <p className="text-[11px] uppercase tracking-[0.36em] text-[var(--color-sand)]">India-first luxury sneaker house</p>
+              <h1 className="mt-6 max-w-4xl font-display text-[4.2rem] leading-[0.88] md:text-[6.6rem]">
+                The shoe gallery with its own pulse.
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-8 text-white/75">
-                LOKUS brings together iconic sneakers, performance runners, and luxury street silhouettes in one refined destination built for India-first commerce.
+              <p className="mt-6 max-w-xl text-base leading-8 text-white/74">
+                LOKUS is not arranged like a marketplace. It feels like a drop journal, a fitting room, and a premium footwear archive in one place.
               </p>
-              <div className="mt-10 flex flex-wrap gap-4">
+
+              <div className="mt-10 grid gap-4 sm:grid-cols-[auto_auto] sm:items-center">
                 <Link
-                  href="/shop"
-                  className="rounded-full bg-[var(--color-background)] px-7 py-4 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-foreground)]"
+                  href="/men"
+                  className="rounded-full bg-white px-7 py-4 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-foreground)]"
                 >
-                  Shop all shoes
+                  Enter the edit
                 </Link>
                 <Link
                   href="/new-arrivals"
-                  className="rounded-full border border-white/30 px-7 py-4 text-xs font-semibold uppercase tracking-[0.24em] text-white"
+                  className="rounded-full border border-white/18 px-7 py-4 text-xs font-semibold uppercase tracking-[0.24em] text-white"
                 >
-                  Explore new arrivals
+                  Track next drop
                 </Link>
               </div>
+
+              <div className="mt-10 grid gap-4 md:grid-cols-3">
+                {[
+                  ['Signal', 'Curated, not crowded.'],
+                  ['Drop', 'Countdown-led launches.'],
+                  ['Finish', 'Luxury layout, sharper commerce.'],
+                ].map(([label, body]) => (
+                  <div key={label} className="rounded-[1.5rem] border border-white/10 bg-white/7 px-4 py-5 backdrop-blur">
+                    <p className="text-[10px] uppercase tracking-[0.28em] text-[var(--color-sand)]">{label}</p>
+                    <p className="mt-3 text-sm text-white/72">{body}</p>
+                  </div>
+                ))}
+              </div>
             </Reveal>
-            <Reveal delay={0.14} className="grid gap-4 rounded-[2rem] border border-white/10 bg-white/8 p-6 text-white backdrop-blur">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-sand)]">Launch promise</p>
-                <h2 className="mt-3 font-display text-4xl">Premium feeling at every step</h2>
+
+            <Reveal delay={0.12} className="grid gap-4">
+              <div className="relative min-h-[18rem] overflow-hidden rounded-[2rem] border border-white/10 bg-black/20">
+                <Image
+                  src="https://images.unsplash.com/photo-1543508282-6319a3e2621f?auto=format&fit=crop&w=1400&q=80"
+                  alt="LOKUS footwear editorial"
+                  fill
+                  priority
+                  className="object-cover opacity-86"
+                  sizes="(max-width: 1024px) 100vw, 28rem"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/12 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-sand)]">Brand signal</p>
+                  <p className="mt-3 max-w-sm text-sm leading-7 text-white/74">
+                    Strong shapes, warm metal tones, and a controlled runway feel define every public page.
+                  </p>
+                </div>
               </div>
-              <div className="grid gap-4 text-sm text-white/72">
-                <p>Curated across Nike, Adidas, Puma, New Balance, Asics, and beyond.</p>
-                <p>Luxury editorial presentation with fast, trusted checkout and India-friendly pricing.</p>
-                <p>Designed to feel as elevated as the product itself.</p>
-              </div>
+              <DropCountdown drop={leadDrop} compact />
             </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="section-wrap mt-10">
-        <Reveal className="premium-card premium-grid px-6 py-8 md:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      <section className="section-wrap mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
+        <Reveal className="lokus-panel bg-white px-6 py-8 md:px-8">
+          <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Featured labels</p>
-              <h2 className="mt-3 font-display text-4xl">Brands with presence</h2>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Brand circuit</p>
+              <h2 className="mt-3 font-display text-5xl leading-none">Labels chosen for presence, not noise.</h2>
             </div>
-            <div className="flex flex-wrap gap-3">
-              {featuredBrandNames.map((brand) => (
-                <Link
-                  key={brand}
-                  href={`/shop?brand=${encodeURIComponent(brand)}`}
-                  className="rounded-full border border-[var(--color-border)] bg-white/70 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--color-foreground)]"
-                >
-                  {brand}
-                </Link>
-              ))}
-            </div>
+            <Link href="/brands" className="text-xs uppercase tracking-[0.22em] text-[var(--color-ember)]">
+              Open brand edit
+            </Link>
           </div>
-        </Reveal>
-      </section>
-
-      <section className="section-wrap mt-16">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Featured now</p>
-            <h2 className="mt-3 font-display text-5xl">Curated spotlight pairs</h2>
-          </div>
-          <Link href="/shop" className="text-sm uppercase tracking-[0.22em] text-[var(--color-foreground)]">
-            View catalog
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {featuredProducts.map((product, index) => (
-            <Reveal key={product.id} delay={Math.min(index * 0.05, 0.2)}>
-              <ProductCard product={product} priority={index < 2} />
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      <section className="section-wrap mt-20">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {collectionHighlights.map((highlight, index) => (
-            <Reveal key={highlight.title} delay={Math.min(index * 0.05, 0.15)} className="premium-card p-6 md:p-8">
-              <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">{highlight.eyebrow}</p>
-              <h3 className="mt-4 font-display text-4xl">{highlight.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-[var(--color-muted-foreground)]">{highlight.description}</p>
-              <Link href={highlight.href} className="mt-8 inline-block text-xs uppercase tracking-[0.22em] text-[var(--color-ember)]">
-                Explore collection
+          <div className="mt-8 flex flex-wrap gap-3">
+            {featuredBrandNames.map((brand) => (
+              <Link
+                key={brand}
+                href={`/shop?brand=${encodeURIComponent(brand)}`}
+                className="rounded-full border border-[var(--color-border)] bg-[var(--color-mist)]/55 px-4 py-3 text-xs uppercase tracking-[0.2em] text-[var(--color-foreground)]"
+              >
+                {brand}
               </Link>
-            </Reveal>
-          ))}
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.05} className="lokus-panel bg-[var(--color-foreground)] px-6 py-8 text-white">
+          <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--color-sand)]">Drop board</p>
+          <div className="mt-5 space-y-4">
+            {upcomingDrops.map((drop) => (
+              <div key={drop.id} className="rounded-[1.5rem] border border-white/10 bg-white/7 px-4 py-4">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-[var(--color-sand)]">{drop.brand}</p>
+                <p className="mt-2 font-display text-3xl">{drop.model}</p>
+                <p className="mt-2 text-sm text-white/68">{drop.colorway}</p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="section-wrap mt-18">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <Reveal className="lokus-line pl-6">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Signature sections</p>
+            <h2 className="mt-4 max-w-lg font-display text-6xl leading-[0.92]">Pages aligned like an editorial route map.</h2>
+            <p className="mt-5 max-w-md text-sm leading-7 text-[var(--color-muted-foreground)]">
+              Instead of repeating symmetrical blocks, LOKUS now uses rails, staggered cards, and drop-led storytelling so the identity stays visible across the whole journey.
+            </p>
+          </Reveal>
+
+          <div className="grid gap-5">
+            {collectionHighlights.map((highlight, index) => (
+              <Reveal
+                key={highlight.title}
+                delay={Math.min(index * 0.05, 0.14)}
+                className={`lokus-panel px-6 py-8 md:px-8 ${index === 1 ? 'md:ml-12' : index === 2 ? 'md:mr-12' : ''} bg-white`}
+              >
+                <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">{highlight.eyebrow}</p>
+                <h3 className="mt-4 font-display text-4xl">{highlight.title}</h3>
+                <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--color-muted-foreground)]">{highlight.description}</p>
+                <Link href={highlight.href} className="mt-7 inline-block text-xs uppercase tracking-[0.22em] text-[var(--color-ember)]">
+                  Explore
+                </Link>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="section-wrap mt-20 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <Reveal className="premium-card relative min-h-[28rem] overflow-hidden">
-          <Image
-            src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1400&q=80"
-            alt="Luxury footwear showroom"
-            fill
-            className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 50vw"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-8 text-white">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-sand)]">Brand point of view</p>
-            <h2 className="mt-4 font-display text-5xl leading-none">Editorial luxury meets real commerce utility.</h2>
-            <p className="mt-4 max-w-lg text-sm leading-7 text-white/75">
-              We pair cinematic product storytelling with easy browsing, trusted payment, and a catalog structure built for daily shopping habits.
-            </p>
+      <section className="section-wrap mt-20 grid gap-8 xl:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
+        <div>
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Selected now</p>
+              <h2 className="mt-3 font-display text-5xl">Spotlight pairs</h2>
+            </div>
+            <Link href="/shop" className="text-xs uppercase tracking-[0.22em] text-[var(--color-ember)]">
+              See all
+            </Link>
           </div>
-        </Reveal>
+          <div className="grid gap-6 md:grid-cols-2">
+            {featuredProducts.map((product, index) => (
+              <Reveal key={product.id} delay={Math.min(index * 0.04, 0.16)}>
+                <ProductCard product={product} priority={index < 2} />
+              </Reveal>
+            ))}
+          </div>
+        </div>
+
         <div className="grid gap-6">
-          <Reveal className="premium-card p-6 md:p-8">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">New arrivals</p>
-            <h2 className="mt-4 font-display text-4xl">Fresh silhouettes landing now</h2>
-            <div className="mt-6 grid gap-4">
-              {newArrivals.map((product) => (
-                <Link key={product.id} href={`/product/${product.id}`} className="flex items-center justify-between rounded-[1.25rem] border border-[var(--color-border)] bg-white/70 px-4 py-4">
+          <Reveal className="lokus-panel relative min-h-[19rem] overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1400&q=80"
+              alt="LOKUS editorial rail"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1280px) 100vw, 26rem"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/16 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-8 text-white">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-sand)]">House note</p>
+              <h3 className="mt-4 font-display text-5xl leading-none">A store you can recognize from the layout alone.</h3>
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.08} className="lokus-panel bg-white px-6 py-8 md:px-8">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Immediate arrivals</p>
+            <div className="mt-5 space-y-4">
+              {newPairs.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.id}`}
+                  className="flex items-center justify-between rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-mist)]/45 px-4 py-4"
+                >
                   <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">{product.brand || 'LOKUS'}</p>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--color-muted-foreground)]">{product.brand || 'LOKUS'}</p>
                     <p className="mt-1 text-base font-semibold">{product.name}</p>
                   </div>
-                  <span className="text-sm text-[var(--color-foreground)]">Open</span>
+                  <span className="text-xs uppercase tracking-[0.18em] text-[var(--color-ember)]">Open</span>
                 </Link>
               ))}
             </div>
           </Reveal>
-          <Reveal delay={0.08} className="premium-card p-6 md:p-8">
-            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Private access</p>
-            <h2 className="mt-4 font-display text-4xl">Join for early drops and launch notes</h2>
+
+          <Reveal delay={0.12} className="lokus-panel bg-white px-6 py-8 md:px-8">
+            <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Private list</p>
+            <h3 className="mt-3 font-display text-4xl">Receive official LOKUS notes before the crowd.</h3>
             <p className="mt-4 text-sm leading-7 text-[var(--color-muted-foreground)]">
-              Stay close to the latest releases, size restocks, styling notes, and invite-only promotions.
+              We will use the official LOKUS sender for drop alerts, curated edits, and launch confirmations.
             </p>
             <div className="mt-6">
               <NewsletterForm />

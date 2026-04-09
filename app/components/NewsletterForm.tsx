@@ -5,21 +5,32 @@ import { useState } from 'react';
 export default function NewsletterForm() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!email) return;
 
     setStatus('loading');
+    setMessage('');
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      console.log('Newsletter signup:', email);
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to join the list right now.');
+      }
       setStatus('success');
+      setMessage('You are on the LOKUS list.');
       setEmail('');
       window.setTimeout(() => setStatus('idle'), 3000);
-    } catch {
+    } catch (error) {
       setStatus('error');
+      setMessage(error instanceof Error ? error.message : 'Unable to join the list right now.');
       window.setTimeout(() => setStatus('idle'), 3000);
     }
   };
@@ -44,9 +55,9 @@ export default function NewsletterForm() {
           {status === 'loading' ? 'Joining...' : 'Join list'}
         </button>
       </form>
-      {status === 'success' ? (
-        <p className="mt-3 text-xs uppercase tracking-[0.2em] text-[var(--color-ember)]">
-          You are on the list.
+      {message ? (
+        <p className={`mt-3 text-xs uppercase tracking-[0.2em] ${status === 'error' ? 'text-red-600' : 'text-[var(--color-ember)]'}`}>
+          {message}
         </p>
       ) : null}
     </div>

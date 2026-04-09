@@ -14,7 +14,11 @@ export async function POST(request: NextRequest) {
   });
 
   try {
-    const { amount, currency = 'INR' } = (await request.json()) as { amount?: number; currency?: string };
+    const { amount, currency = 'INR', receipt } = (await request.json()) as {
+      amount?: number;
+      currency?: string;
+      receipt?: string;
+    };
 
     if (!amount) {
       return NextResponse.json({ error: 'Amount is required' }, { status: 400 });
@@ -23,7 +27,7 @@ export async function POST(request: NextRequest) {
     const order = await razorpay.orders.create({
       amount: Math.round(amount * 100),
       currency,
-      receipt: `receipt_${Date.now()}`,
+      receipt: receipt || `receipt_${Date.now()}`,
     });
 
     return NextResponse.json({
