@@ -6,16 +6,15 @@ import { useEffect, useState } from 'react';
 
 import { formatPrice, productPrimaryImage } from '@/app/lib/format';
 import type { Product } from '@/app/lib/types';
-import { createClient } from '@/utils/supabase/client';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
-    const supabase = createClient();
-    const { data } = await supabase.from('products').select('*').order('id', { ascending: false });
-    setProducts((data as Product[] | null) ?? []);
+    const response = await fetch('/api/products?sort=newest');
+    const json = (await response.json()) as { products?: Product[] };
+    setProducts(json.products ?? []);
     setLoading(false);
   };
 
@@ -23,11 +22,11 @@ export default function AdminProductsPage() {
     let active = true;
 
     const loadProducts = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.from('products').select('*').order('id', { ascending: false });
-
       if (!active) return;
-      setProducts((data as Product[] | null) ?? []);
+      const response = await fetch('/api/products?sort=newest');
+      const json = (await response.json()) as { products?: Product[] };
+      if (!active) return;
+      setProducts(json.products ?? []);
       setLoading(false);
     };
 
@@ -41,8 +40,7 @@ export default function AdminProductsPage() {
   const handleDelete = async (id: number) => {
     if (!window.confirm('Delete this product?')) return;
 
-    const supabase = createClient();
-    await supabase.from('products').delete().eq('id', id);
+    await fetch(`/api/products/${id}`, { method: 'DELETE' });
     void fetchProducts();
   };
 

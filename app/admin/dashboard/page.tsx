@@ -31,21 +31,21 @@ export default function AdminDashboard() {
 
     const fetchStats = async () => {
       const supabase = createClient();
-      const [{ count: productCount }, { data: orders }] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact', head: true }),
+      const [productRes, ordersRes] = await Promise.all([
+        fetch('/api/products?count=1&limit=1').then((res) => res.json() as Promise<{ count?: number }>),
         supabase.from('orders').select('total_amount, status'),
       ]);
 
       if (!active) return;
 
-      const typedOrders = (orders as OrderSummary[] | null) ?? [];
+      const typedOrders = (ordersRes.data as OrderSummary[] | null) ?? [];
       const totalRevenue = typedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
       const activeDeliveries = typedOrders.filter((order) =>
         ['ready_to_dispatch', 'assigned', 'accepted', 'picked_up', 'out_for_delivery'].includes(order.status || '')
       ).length;
 
       setStats({
-        totalProducts: productCount || 0,
+        totalProducts: productRes.count || 0,
         totalOrders: typedOrders.length,
         totalRevenue: totalRevenue / 100,
         activeDeliveries,

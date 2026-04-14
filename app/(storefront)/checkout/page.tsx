@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { validateCheckoutForm } from '@/app/lib/checkout';
 import { formatPrice, formatShippingAddress } from '@/app/lib/format';
+import { useHydrated } from '@/app/lib/use-hydrated';
 import type { CheckoutFormValues } from '@/app/lib/types';
 import { useAuth } from '@/app/context/AuthContext';
 import { useCart } from '@/app/context/CartContext';
@@ -65,11 +66,7 @@ function readStoredCheckoutDetails() {
 }
 
 export default function CheckoutPage() {
-  const hydrated = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false
-  );
+  const hydrated = useHydrated();
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);

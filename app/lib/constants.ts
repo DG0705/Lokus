@@ -30,17 +30,22 @@ export const defaultProductImage =
   'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1400&q=80';
 
 export const navLinks = [
-  { href: '/men', label: 'Men' },
-  { href: '/women', label: 'Women' },
-  { href: '/new-arrivals', label: 'Drop Clock' },
-  { href: '/brands', label: 'Brands' },
+  { href: '/formal', label: 'Formal' },
+  { href: '/casual', label: 'Casual' },
+  { href: '/sneakers', label: 'Sneakers' },
+  { href: '/boots', label: 'Boots' },
+  { href: '/sandals', label: 'Sandals' },
+  { href: '/heels', label: 'Heels' },
 ] as const;
 
 export const footerShopLinks = [
-  { href: '/men', label: 'Men' },
-  { href: '/women', label: 'Women' },
-  { href: '/new-arrivals', label: 'Drop Clock' },
-  { href: '/brands', label: 'Brand Edit' },
+  { href: '/shop', label: 'Shop all' },
+  { href: '/formal', label: 'Formal' },
+  { href: '/casual', label: 'Casual' },
+  { href: '/sneakers', label: 'Sneakers' },
+  { href: '/boots', label: 'Boots' },
+  { href: '/sandals', label: 'Sandals' },
+  { href: '/heels', label: 'Heels' },
 ] as const;
 
 export const footerSupportLinks = [
@@ -55,18 +60,18 @@ export const collectionHighlights = [
     title: 'Luxury trainers',
     eyebrow: 'Urban precision',
     description: 'Low-profile silhouettes with premium materials for city movement.',
-    href: '/shop?category=Sneakers',
+    href: '/sneakers',
   },
   {
-    title: 'Performance runners',
-    eyebrow: 'Pace ready',
-    description: 'High-cushion styles built for training days, travel days, and everything between.',
-    href: '/shop?category=Running',
+    title: 'Formal rotation',
+    eyebrow: 'Work to evening',
+    description: 'Oxfords, loafers, and sleek profiles designed for long days and sharper nights.',
+    href: '/formal',
   },
   {
-    title: 'Statement street pairs',
-    eyebrow: 'After dark',
-    description: 'Bold color stories and fashion-led profiles for standout rotation pieces.',
-    href: '/shop?category=Streetwear',
+    title: 'Boot season',
+    eyebrow: 'All-weather',
+    description: 'Premium leather boots with grip and structure for monsoon and mileage.',
+    href: '/boots',
   },
 ] as const;

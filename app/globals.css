@@ -10,6 +10,7 @@
   --graphite: #23201d;
   --border: rgba(17, 17, 17, 0.14);
   --shadow: 0 24px 60px rgba(17, 17, 17, 0.1);
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-display: Georgia, 'Times New Roman', serif;
 }
 

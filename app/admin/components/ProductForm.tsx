@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { sanitiseProductMutationInput } from '@/app/lib/product-mutation';
-import { createClient } from '@/utils/supabase/client';
 
 type ProductFormState = {
   name: string;
@@ -53,15 +52,18 @@ export function ProductForm({
 
     try {
       const payload = sanitiseProductMutationInput(formState);
-      const supabase = createClient();
-      const query =
+      const response =
         mode === 'create'
-          ? supabase.from('products').insert(payload)
-          : supabase.from('products').update(payload).eq('id', productId);
+          ? await fetch('/api/products', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) })
+          : await fetch(`/api/products/${productId}`, {
+              method: 'PATCH',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
 
-      const { error: submitError } = await query;
-      if (submitError) {
-        setError(submitError.message);
+      if (!response.ok) {
+        const json = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(json?.error || 'Failed to save product.');
         setLoading(false);
         return;
       }

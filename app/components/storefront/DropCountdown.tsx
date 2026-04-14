@@ -18,9 +18,38 @@ type TimeParts = {
   finished: boolean;
 };
 
-function subscribeToClock(onStoreChange: () => void) {
-  const timer = window.setInterval(onStoreChange, 1000);
-  return () => window.clearInterval(timer);
+const listeners = new Set<() => void>();
+let intervalId: number | null = null;
+let currentTime = typeof window === 'undefined' ? 0 : Date.now();
+
+function emitClockChange() {
+  currentTime = Date.now();
+  listeners.forEach((listener) => listener());
+}
+
+function subscribeToClock(listener: () => void) {
+  listeners.add(listener);
+
+  if (intervalId === null) {
+    intervalId = window.setInterval(emitClockChange, 1000);
+  }
+
+  return () => {
+    listeners.delete(listener);
+
+    if (!listeners.size && intervalId !== null) {
+      window.clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+}
+
+function getClockSnapshot() {
+  return currentTime;
+}
+
+function getServerClockSnapshot() {
+  return 0;
 }
 
 function getTimeParts(targetDate: string, now: number): TimeParts {
@@ -36,7 +65,7 @@ function getTimeParts(targetDate: string, now: number): TimeParts {
 }
 
 export function DropCountdown({ drop, compact = false }: DropCountdownProps) {
-  const now = useSyncExternalStore(subscribeToClock, () => Date.now(), () => 0);
+  const now = useSyncExternalStore(subscribeToClock, getClockSnapshot, getServerClockSnapshot);
   const timeLeft = now === 0 ? null : getTimeParts(drop.releaseAt, now);
 
   const releaseLabel = useMemo(

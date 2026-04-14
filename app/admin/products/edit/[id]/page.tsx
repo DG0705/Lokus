@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 
 import { ProductForm } from '@/app/admin/components/ProductForm';
 import type { Product } from '@/app/lib/types';
-import { createClient } from '@/utils/supabase/client';
 
 const emptyState = {
   name: '',
@@ -31,11 +30,11 @@ export default function EditProductPage() {
     let active = true;
 
     const fetchProduct = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.from('products').select('*').eq('id', params.id).single();
+      const response = await fetch(`/api/products/${params.id}`);
+      const json = (await response.json()) as { product?: Product };
 
-      if (!active || !data) return;
-      const product = data as Product;
+      if (!active || !json.product) return;
+      const product = json.product;
       setFormValues({
         name: product.name || '',
         price: product.price?.toString() || '',

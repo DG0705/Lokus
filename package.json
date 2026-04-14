@@ -2,17 +2,21 @@
   "name": "lokus",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types tests/run-delivery-tests.mts"
+    "test": "node --experimental-strip-types tests/run-delivery-tests.mts",
+    "seed:mongo": "node --experimental-strip-types scripts/seed-products.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.101.1",
+    "dotenv": "^17.4.2",
     "framer-motion": "^12.38.0",
+    "mongoose": "^8.19.1",
     "next": "16.2.2",
     "nodemailer": "^8.0.5",
     "razorpay": "^2.9.6",

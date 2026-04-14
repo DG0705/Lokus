@@ -1,16 +1,10 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
 import Script from 'next/script';
 
 import './globals.css';
 
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-
-const bodyFont = localFont({
-  src: '../node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf',
-  variable: '--font-body',
-});
 
 export const metadata: Metadata = {
   title: 'LOKUS | Premium Multi-Brand Shoe Store',
@@ -27,7 +21,7 @@ export default function RootLayout({
       <head>
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </head>
-      <body className={bodyFont.variable}>
+      <body>
         <AuthProvider>
           <CartProvider>{children}</CartProvider>
         </AuthProvider>

@@ -2,27 +2,32 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useSyncExternalStore } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { BRAND_NAME, navLinks } from '@/app/lib/constants';
+import { useHydrated } from '@/app/lib/use-hydrated';
 import { useAuth } from '@/app/context/AuthContext';
 import { useCart } from '@/app/context/CartContext';
 
 export function StorefrontHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const { totalItems } = useCart();
   const { user, signOut } = useAuth();
-  const mounted = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false
-  );
+  const hydrated = useHydrated();
 
   const closeMenu = () => setMenuOpen(false);
-  const displayTotalItems = mounted ? totalItems : 0;
-  const displayUser = mounted ? user : null;
+  const displayTotalItems = hydrated ? totalItems : 0;
+  const displayUser = hydrated ? user : null;
+
+  const submitSearch = () => {
+    const trimmed = query.trim();
+    router.push(trimmed ? `/shop?q=${encodeURIComponent(trimmed)}` : '/shop');
+    setMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[color:color-mix(in_srgb,var(--color-background)_84%,transparent)] backdrop-blur-xl">
@@ -30,7 +35,17 @@ export function StorefrontHeader() {
         <Link href="/" className="font-display text-3xl tracking-[0.18em] text-[var(--color-foreground)]">
           {BRAND_NAME}
         </Link>
-        <nav className="hidden items-center gap-7 lg:flex">
+        <nav className="hidden items-center gap-6 lg:flex">
+          <Link
+            href="/shop"
+            className={`text-sm uppercase tracking-[0.22em] transition ${
+              pathname === '/shop'
+                ? 'text-[var(--color-foreground)]'
+                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
+            }`}
+          >
+            Shop
+          </Link>
           {navLinks.map((link) => {
             const active = pathname === link.href;
             return (
@@ -46,7 +61,25 @@ export function StorefrontHeader() {
             );
           })}
         </nav>
-        <div className="hidden items-center gap-5 lg:flex">
+        <div className="hidden items-center gap-4 lg:flex">
+          <div className="hidden items-center rounded-full border border-[var(--color-border)] bg-white/60 px-4 py-2 text-sm shadow-[var(--shadow)] xl:flex">
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') submitSearch();
+              }}
+              placeholder="Search shoes…"
+              className="w-56 bg-transparent text-sm text-[var(--color-foreground)] outline-none placeholder:text-[var(--color-muted-foreground)]"
+            />
+            <button
+              type="button"
+              onClick={submitSearch}
+              className="ml-3 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-foreground)]"
+            >
+              Go
+            </button>
+          </div>
           <Link href="/cart" className="text-sm uppercase tracking-[0.22em] text-[var(--color-muted-foreground)] transition hover:text-[var(--color-foreground)]">
             Cart ({displayTotalItems})
           </Link>
@@ -87,6 +120,30 @@ export function StorefrontHeader() {
             className="border-t border-white/10 bg-[var(--color-background)] px-5 py-6 lg:hidden"
           >
             <div className="flex flex-col gap-5">
+              <div className="rounded-[1.25rem] border border-[var(--color-border)] bg-white px-4 py-3 shadow-[var(--shadow)]">
+                <p className="text-[10px] uppercase tracking-[0.24em] text-[var(--color-muted-foreground)]">Search</p>
+                <div className="mt-2 flex items-center gap-3">
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') submitSearch();
+                    }}
+                    placeholder="Search shoes…"
+                    className="w-full bg-transparent text-sm text-[var(--color-foreground)] outline-none placeholder:text-[var(--color-muted-foreground)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={submitSearch}
+                    className="rounded-full bg-[var(--color-foreground)] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-white"
+                  >
+                    Go
+                  </button>
+                </div>
+              </div>
+              <Link href="/shop" onClick={closeMenu} className="text-sm uppercase tracking-[0.24em] text-[var(--color-foreground)]">
+                Shop
+              </Link>
               {navLinks.map((link) => (
                 <Link
                   key={link.href}

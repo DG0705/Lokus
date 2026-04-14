@@ -2,17 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useSyncExternalStore } from 'react';
 
 import { formatPrice } from '@/app/lib/format';
+import { useHydrated } from '@/app/lib/use-hydrated';
 import { useCart } from '@/app/context/CartContext';
 
 export default function CartPage() {
-  const hydrated = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false
-  );
+  const hydrated = useHydrated();
   const { items, removeItem, updateQuantity, totalItems, totalPrice } = useCart();
 
   if (!hydrated) {

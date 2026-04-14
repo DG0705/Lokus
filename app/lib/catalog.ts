@@ -1,5 +1,6 @@
-import { supabase } from '@/app/lib/supabase';
 import type { CatalogFilterOptions, CatalogFilters, Product } from '@/app/lib/types';
+import { connectMongo } from '@/app/lib/mongoose';
+import { ProductModel } from '@/app/lib/models/Product';
 
 function normaliseSearchParam(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;
@@ -24,120 +25,104 @@ export function parseCatalogFilters(input: Record<string, string | string[] | un
   };
 }
 
-export async function getProducts(filters: CatalogFilters = {}) {
-  const client = await supabase();
-  let query = client.from('products').select('*');
+function escapeRegex(input: string) {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-  if (filters.brand) query = query.eq('brand', filters.brand);
-  if (filters.gender) query = query.eq('gender', filters.gender);
-  if (filters.category) query = query.eq('category', filters.category);
-  if (filters.size) query = query.contains('sizes', [Number(filters.size)]);
+export async function getProducts(filters: CatalogFilters = {}) {
+  await connectMongo();
+
+  const query: Record<string, unknown> = {};
+
+  if (filters.brand) query.brand = filters.brand;
+  if (filters.gender) query.gender = filters.gender;
+  if (filters.category) query.category = filters.category;
+  if (filters.size) query.sizes = Number(filters.size);
 
   const priceRange = parsePriceRange(filters.price);
-  if (priceRange) {
-    query = query.gte('price', priceRange.min).lte('price', priceRange.max);
-  }
+  if (priceRange) query.price = { $gte: priceRange.min, $lte: priceRange.max };
 
   if (filters.q) {
-    const escaped = filters.q.replace(/,/g, ' ');
-    query = query.or(`name.ilike.%${escaped}%,brand.ilike.%${escaped}%,category.ilike.%${escaped}%`);
+    const normalized = filters.q.replace(/,/g, ' ').trim();
+    if (normalized) {
+      const regex = new RegExp(escapeRegex(normalized), 'i');
+      query.$or = [{ name: regex }, { brand: regex }, { category: regex }];
+    }
   }
 
-  switch (filters.sort) {
-    case 'price-asc':
-      query = query.order('price', { ascending: true });
-      break;
-    case 'price-desc':
-      query = query.order('price', { ascending: false });
-      break;
-    case 'name':
-      query = query.order('name', { ascending: true });
-      break;
-    case 'newest':
-      query = query.order('id', { ascending: false });
-      break;
-    case 'featured':
-    default:
-      query = query.order('is_featured', { ascending: false }).order('id', { ascending: false });
-      break;
-  }
+  const sort =
+    filters.sort === 'price-asc'
+      ? { price: 1 }
+      : filters.sort === 'price-desc'
+        ? { price: -1 }
+        : filters.sort === 'name'
+          ? { name: 1 }
+          : filters.sort === 'newest'
+            ? { id: -1 }
+            : { is_featured: -1, id: -1 };
 
-  const { data, error } = await query;
-  if (error || !data) return [];
-  return data as Product[];
+  const products = await ProductModel.find(query).sort(sort).lean<Product[]>();
+  return products;
 }
 
 export async function getFeaturedProducts(limit = 6) {
-  const client = await supabase();
-  const { data, error } = await client
-    .from('products')
-    .select('*')
-    .order('is_featured', { ascending: false })
-    .order('id', { ascending: false })
-    .limit(limit);
-
-  if (error || !data) return [];
-  return data as Product[];
+  await connectMongo();
+  const products = await ProductModel.find({})
+    .sort({ is_featured: -1, id: -1 })
+    .limit(limit)
+    .lean<Product[]>();
+  return products;
 }
 
 export async function getFilterOptions(): Promise<CatalogFilterOptions> {
-  const client = await supabase();
-  const { data, error } = await client.from('products').select('brand, gender, category, sizes');
-  if (error || !data) {
-    return { brands: [], genders: [], categories: [], sizes: [] };
-  }
+  await connectMongo();
 
-  const brands = new Set<string>();
-  const genders = new Set<string>();
-  const categories = new Set<string>();
-  const sizes = new Set<number>();
-
-  data.forEach((item) => {
-    if (item.brand) brands.add(item.brand);
-    if (item.gender) genders.add(item.gender);
-    if (item.category) categories.add(item.category);
-    if (Array.isArray(item.sizes)) {
-      item.sizes.forEach((size) => {
-        if (typeof size === 'number') sizes.add(size);
-      });
-    }
-  });
+  const [brands, genders, categories, sizeRows] = await Promise.all([
+    ProductModel.distinct('brand', { brand: { $ne: null } }) as Promise<string[]>,
+    ProductModel.distinct('gender', { gender: { $ne: null } }) as Promise<string[]>,
+    ProductModel.distinct('category', { category: { $ne: null } }) as Promise<string[]>,
+    ProductModel.aggregate<{ _id: number }>([
+      { $match: { sizes: { $type: 'array' } } },
+      { $unwind: '$sizes' },
+      { $group: { _id: '$sizes' } },
+      { $sort: { _id: 1 } },
+    ]),
+  ]);
 
   return {
-    brands: Array.from(brands).sort(),
-    genders: Array.from(genders).sort(),
-    categories: Array.from(categories).sort(),
-    sizes: Array.from(sizes).sort((a, b) => a - b),
+    brands: brands.filter(Boolean).sort(),
+    genders: genders.filter(Boolean).sort(),
+    categories: categories.filter(Boolean).sort(),
+    sizes: sizeRows.map((row) => row._id).filter((value) => typeof value === 'number'),
   };
 }
 
 export async function getProductById(id: number) {
-  const client = await supabase();
-  const { data, error } = await client.from('products').select('*').eq('id', id).single();
-  if (error || !data) return null;
-  return data as Product;
+  await connectMongo();
+  const product = await ProductModel.findOne({ id }).lean<Product | null>();
+  return product;
 }
 
 export async function getRelatedProducts(product: Product, limit = 4) {
-  const client = await supabase();
-  let query = client.from('products').select('*').neq('id', product.id).limit(limit);
+  await connectMongo();
 
+  const baseQuery: Record<string, unknown> = { id: { $ne: product.id } };
   if (product.brand) {
-    query = query.eq('brand', product.brand);
+    baseQuery.brand = product.brand;
   } else if (product.category) {
-    query = query.eq('category', product.category);
+    baseQuery.category = product.category;
   }
 
-  const { data, error } = await query.order('is_featured', { ascending: false }).order('id', { ascending: false });
-  if (error || !data || !data.length) {
-    const fallback = await client
-      .from('products')
-      .select('*')
-      .neq('id', product.id)
-      .order('id', { ascending: false })
-      .limit(limit);
-    return (fallback.data as Product[] | null) ?? [];
-  }
+  const related = await ProductModel.find(baseQuery)
+    .sort({ is_featured: -1, id: -1 })
+    .limit(limit)
+    .lean<Product[]>();
 
-  return data as Product[];
+  if (related.length) return related;
+
+  const fallback = await ProductModel.find({ id: { $ne: product.id } })
+    .sort({ id: -1 })
+    .limit(limit)
+    .lean<Product[]>();
+  return fallback;
 }

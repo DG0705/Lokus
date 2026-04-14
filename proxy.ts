@@ -10,6 +10,7 @@ export async function proxy(request: NextRequest) {
   const isAccountRoute = pathname.startsWith('/account');
   const isAdminRoute = pathname.startsWith('/admin');
   const isDeliveryRoute = pathname.startsWith('/delivery');
+  const isAdminLoginRoute = pathname === '/admin/login';
 
   if (!isAccountRoute && !isAdminRoute && !isDeliveryRoute) {
     return response;
@@ -42,10 +43,18 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(new URL(isAdminRoute ? '/admin/login' : '/login', request.url));
+    if (isAdminLoginRoute) {
+      return response;
+    }
+
+    if (isAdminRoute && !isAdminLoginRoute) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  if (isAdminRoute && pathname !== '/admin/login') {
+  if (isAdminRoute && !isAdminLoginRoute) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_admin')

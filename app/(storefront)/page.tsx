@@ -50,7 +50,7 @@ export default async function HomePage() {
 
               <div className="mt-10 grid gap-4 sm:grid-cols-[auto_auto] sm:items-center">
                 <Link
-                  href="/men"
+                  href="/shop"
                   className="rounded-full bg-white px-7 py-4 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-foreground)]"
                 >
                   Explore shoes
@@ -145,7 +145,7 @@ export default async function HomePage() {
               <p className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted-foreground)]">Front rack</p>
               <h2 className="mt-3 font-display text-5xl leading-none">The pairs shoppers should meet in the first thirty seconds.</h2>
             </div>
-            <Link href="/men" className="text-xs uppercase tracking-[0.22em] text-[var(--color-ember)]">
+            <Link href="/shop" className="text-xs uppercase tracking-[0.22em] text-[var(--color-ember)]">
               Open full floor
             </Link>
           </div>
